@@ -11,6 +11,7 @@
         "laravel/sanctum": "^3.0",
         "laravel/tinker": "^2.7",
         "tonysm/importmap-laravel": "^1.2",
+        "tonysm/stimulus-laravel": "^0.0.1",
         "tonysm/tailwindcss-laravel": "^0.7.0"
     },
     "require-dev": {
