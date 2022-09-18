@@ -38,7 +38,7 @@
     <hr class="mt-10" />
 
     <div class="max-w-7xl w-full mx-auto px-5 sm:px-20 flex md:space-x-6">
-        <aside class="hidden md:block py-10 sm:shrink-0 w-1/6 sm:w-1/4 overflow-hidden prose [&>ul]:px-0 [&>ul]:list-none prose-a:underline-offset-2 pr-4 sm:border-r sm:border-gray-200">
+        <aside data-controller="nav-highlight" data-action="click->nav-highlight#highlight nav-highlighted@window->nav-highlight#highlightFromHref" data-nav-highlight-css-class="text-indigo-600" class="hidden md:block py-10 sm:shrink-0 w-1/6 sm:w-1/4 overflow-hidden prose [&>ul]:px-0 [&>ul]:list-none prose-a:underline-offset-2 pr-4 sm:border-r sm:border-gray-200">
             {!! $index !!}
         </aside>
 
