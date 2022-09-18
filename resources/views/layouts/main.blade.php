@@ -11,21 +11,22 @@
 
     <x-importmap-tags />
 </head>
-<body class="w-full min-h-screen antialiased bg-gray-50">
-    <x-skip-to-main-content />
+<body class="antialiased">
+    <div class="w-full min-h-screen bg-gray-50" data-controller="nav-highlight" data-nav-highlight-css-class="text-indigo-600">
+        <x-skip-to-main-content />
 
-    <header class="bg-white shadow-sm py-5">
-        <x-navigation>
-            <x-slot:mobileIndex>
-                @yield('mobileIndex', $mobileIndex ?? '')
-            </x-slot>
-        </x-navigation>
+        <header class="bg-white shadow-sm py-5">
+            <x-navigation>
+                <x-slot:mobileIndex>
+                    @yield('mobileIndex', $mobileIndex ?? '')
+                </x-slot>
+            </x-navigation>
+            @yield('afterHeader', $afterHeader ?? '')
+        </header>
 
-        @yield('afterHeader', $afterHeader ?? '')
-    </header>
+        @yield('content', $slot ?? '')
 
-    @yield('content', $slot ?? '')
-
-    <x-footer class="py-4 px-8 sm:px-20 bg-gray-600 text-white" />
+        <x-footer class="py-4 px-8 sm:px-20 bg-gray-600 text-white" />
+    </div>
 </body>
 </html>

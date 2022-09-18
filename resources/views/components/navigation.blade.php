@@ -1,5 +1,5 @@
-<div class="font-sans px-5 sm:px-20">
-    <nav class="hidden max-w-7xl mx-auto w-full md:flex items-center justify-between">
+<div class="max-w-7xl mx-auto w-full font-sans px-5 lg:px-20">
+    <nav class="hidden md:flex items-center justify-between">
         <!-- Left Side -->
         <ul class="flex items-center space-x-4">
             <li><a href="#home" class="font-semibold text-2xl">{{ __('Turbo Laravel') }}</a></li>
@@ -19,7 +19,7 @@
     <nav class="md:hidden" data-controller="dropdown" data-dropdown-css-class="hidden">
         <div class="relative">
             <ul class="flex items-center justify-between">
-                <li><a href="#home">Turbo Laravel</a></li>
+                <li><a href="#home" class="font-bold">Turbo Laravel</a></li>
                 <li><button data-action="click->dropdown#toggle"><x-icons.bars-3 /></button></li>
             </ul>
 
@@ -37,7 +37,7 @@
                     <li><a href="https://github.com/tonysm/turbo-laravel">GitHub</a></li>
                 </ul>
 
-                <div data-controller="nav-highlight" data-action="nav-highlighted@window->nav-highlight#highlightFromHref click->nav-highlight#highlight click->dropdown#close" data-nav-highlight-css-class="text-indigo-600" class="flex flex-col mt-5 pt-5 border-t border-gray-200 space-y-2 prose [&>ul]:list-none [&>ul]:px-0">
+                <div data-nav-highlight-target="nav" data-action="click->dropdown#close" class="flex flex-col mt-5 pt-5 border-t border-gray-100 space-y-2 prose [&>ul]:list-none [&>ul]:px-0">
                     @yield('mobileIndex', $mobileIndex ?? '')
                 </div>
             </div>

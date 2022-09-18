@@ -2,41 +2,52 @@ import { Controller } from "@hotwired/stimulus"
 
 // Connects to data-controller="nav-highlight"
 export default class extends Controller {
+    static targets = ['nav'];
     static classes = ['css'];
 
     connect() {
-        let currentSelectedItem = this.findCurrentSelectedItem();
+        this.navTargets.forEach(nav => {
+            let currentSelectedItem = this._findCurrentSelectedItem(nav);
 
-        if (! currentSelectedItem) return;
+            if (! currentSelectedItem) return;
 
-        this.highlightElement(currentSelectedItem);
+            this._highlightElement(nav, currentSelectedItem);
+        })
     }
 
-    findCurrentSelectedItem() {
-        return this.allLinks.find(a => {
+    highlightFromLoad({ target }) {
+        if (! target.src) return;
+
+        this.navTargets.forEach(nav => {
+            let currentSelectedItem = this._findCurrentSelectedByHref(nav, target.src);
+
+            if (! currentSelectedItem) return;
+
+            this._highlightElement(nav, currentSelectedItem);
+        })
+    }
+
+    _findCurrentSelectedItem(el) {
+        return this._allLinks(el).find(a => {
             return a.href.endsWith(window.location.pathname);
         });
     }
 
-    highlight(event) {
-        if (! event.target.matches('a')) return;
-
-        window.dispatchEvent(new CustomEvent('nav-highlighted', { detail : { href: event.target.href } }));
+    _findCurrentSelectedByHref(nav, href) {
+        return this._allLinks(nav).find(a => {
+            return a.href === href;
+        });
     }
 
-    highlightFromHref({ detail: { href } }) {
-        this.highlightElement(this.allLinks.find(a => a.href === href));
-    }
-
-    highlightElement(el) {
-        this.allLinks.forEach(a => {
+    _highlightElement(nav, currentLink) {
+        this._allLinks(nav).forEach(a => {
             a.classList.remove(this.cssClass);
         });
 
-        el.classList.add(this.cssClass);
+        currentLink.classList.add(this.cssClass);
     }
 
-    get allLinks() {
-        return [...this.element.querySelectorAll('a')];
+    _allLinks(nav) {
+        return [...nav.querySelectorAll('a')];
     }
 }

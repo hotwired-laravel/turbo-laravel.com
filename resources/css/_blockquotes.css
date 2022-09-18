@@ -1,5 +1,5 @@
 .fancy-quote-mark {
-  @apply mr-2 text-8xl right-full hidden font-mono text-neutral-500 absolute top-0 leading-none;
+  @apply -mr-14 text-8xl right-full hidden font-mono text-neutral-500 absolute top-0 leading-none;
 }
 
 @screen sm {
