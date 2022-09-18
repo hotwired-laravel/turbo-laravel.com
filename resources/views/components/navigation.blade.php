@@ -2,7 +2,7 @@
     <nav class="hidden md:flex items-center justify-between">
         <!-- Left Side -->
         <ul class="flex items-center space-x-4">
-            <li><a href="#home" class="font-semibold text-2xl">{{ __('Turbo Laravel') }}</a></li>
+            <li><a href="/" class="font-semibold text-2xl">{{ __('Turbo Laravel') }}</a></li>
         </ul>
 
         <!-- Right Side -->
