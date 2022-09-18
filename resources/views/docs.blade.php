@@ -8,9 +8,6 @@
     <div class="max-w-7xl w-full mx-auto px-5 sm:px-20 my-10 space-y-6">
         <h1 class="text-center text-4xl md:text-8xl font-sans font-semibold">Turbo Laravel</h1>
         <p class="text-xl text-center text-gray-900">An elegant way to combine <a href="https://hotwired.dev/" class="underline underline-offset-2 decoration-wavy font-semibold">Hotwire</a> and <a href="https://laravel.com/" class="underline underline-offset-2 decoration-wavy font-semibold">Laravel</a>.</p>
-        <div class="text-center">
-            <x-button-link href="https://bootcamp.turbo-laravel.com">See the Bootcamp</x-button-link>
-        </div>
     </div>
 
     <div class="px-5 sm:px-20 mt-10 space-y-6 max-w-4xl w-full mx-auto">
