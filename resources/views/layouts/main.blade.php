@@ -24,9 +24,7 @@
         @yield('afterHeader', $afterHeader ?? '')
     </header>
 
-    <x-main-content>
-        @yield('content', $slot ?? '')
-    </x-main-content>
+    @yield('content', $slot ?? '')
 
     <x-footer class="py-4 px-8 sm:px-20 bg-gray-600 text-white" />
 </body>

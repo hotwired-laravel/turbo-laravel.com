@@ -42,10 +42,12 @@
             {!! $index !!}
         </aside>
 
-        <x-turbo-frame class="block flex-1 h-full overflow-hidden" id="docs-content" data-turbo-action="advance">
-            <article class="py-10 sm:px-8 prose max-w-none w-full">
-                {!! $content !!}
-            </article>
-        </x-turbo-frame>
+        <x-main-content class="block flex-1 h-full overflow-hidden">
+            <x-turbo-frame id="docs-content" data-turbo-action="advance">
+                <article class="py-10 sm:px-8 prose max-w-none w-full">
+                    {!! $content !!}
+                </article>
+            </x-turbo-frame>
+        </x-main-content>
     </div>
 @stop

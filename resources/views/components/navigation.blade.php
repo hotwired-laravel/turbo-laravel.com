@@ -12,9 +12,7 @@
                     <x-inputs.text type="search" placeholder="Search..." name="search" class="w-40 focus:w-60" />
                 </form>
             </li>
-            <li><a href="#bootcamp" class="font-medium underline underline-offset-4">{{ __('Bootcamp') }}</a></li>
-            <li><a href="#starter-kit" class="font-medium underline underline-offset-4">{{ __('Starter Kit') }}</a></li>
-            <li><a href="#github" class="font-medium underline underline-offset-4">{{ __('GitHub') }}</a></li>
+            <li><a href="https://github.com/tonysm/turbo-laravel" class="font-medium underline underline-offset-4">{{ __('GitHub') }}</a></li>
         </ul>
     </nav>
 
@@ -36,12 +34,10 @@
                 data-transition-leave-end="transform opacity-0 scale-95"
             >
                 <ul class="flex flex-col mt-5 pt-5 border-t border-gray-100 space-y-2">
-                    <li><a href="#">Bootcamp</a></li>
-                    <li><a href="#">Starter Kit</a></li>
-                    <li><a href="#">GitHub</a></li>
+                    <li><a href="https://github.com/tonysm/turbo-laravel">GitHub</a></li>
                 </ul>
 
-                <div class="flex flex-col mt-5 pt-5 border-t border-gray-200 space-y-2 prose" data-action="click->dropdown#close">
+                <div class="flex flex-col mt-5 pt-5 border-t border-gray-200 space-y-2 prose [&>ul]:list-none [&>ul]:px-0" data-action="click->dropdown#close">
                     @yield('mobileIndex', $mobileIndex ?? '')
                 </div>
             </div>
