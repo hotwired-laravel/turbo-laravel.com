@@ -1,26 +1,50 @@
-<header>
-    <nav class="hidden sm:flex items-center justify-between">
+<div class="font-sans px-5 sm:px-20">
+    <nav class="hidden max-w-7xl mx-auto w-full md:flex items-center justify-between">
         <!-- Left Side -->
-        <ul class="flex items-center space-x-2">
-            <li><a href="#">{{ __('Turbo Laravel') }}</a></li>
+        <ul class="flex items-center space-x-4">
+            <li><a href="#home" class="font-semibold text-2xl">{{ __('Turbo Laravel') }}</a></li>
         </ul>
 
         <!-- Right Side -->
-        <ul class="flex items-center space-x-2">
-            <li><a href="#">Bootcamp</a></li>
-            <li><a href="#">GitHub</a></li>
+        <ul class="flex items-center space-x-5">
+            <li>
+                <form action="">
+                    <x-inputs.text type="search" placeholder="Search..." name="search" class="w-40 focus:w-60" />
+                </form>
+            </li>
+            <li><a href="#bootcamp" class="font-medium underline underline-offset-4">{{ __('Bootcamp') }}</a></li>
+            <li><a href="#starter-kit" class="font-medium underline underline-offset-4">{{ __('Starter Kit') }}</a></li>
+            <li><a href="#github" class="font-medium underline underline-offset-4">{{ __('GitHub') }}</a></li>
         </ul>
     </nav>
 
-    <div class="relative sm:hidden border-b border-gray-100">
-        <ul class="flex items-center justify-between">
-            <li><a href="#">Turbo Laravel</a></li>
-            <li><button>Menu</button></li>
-        </ul>
+    <nav class="md:hidden" data-controller="dropdown" data-dropdown-css-class="hidden">
+        <div class="relative">
+            <ul class="flex items-center justify-between">
+                <li><a href="#home">Turbo Laravel</a></li>
+                <li><button data-action="click->dropdown#toggle"><x-icons.bars-3 /></button></li>
+            </ul>
 
-        <ul class="flex flex-col space-x-2">
-            <li><a href="#">Bootcamp</a></li>
-            <li><a href="#">GitHub</a></li>
-        </ul>
-    </div>
-</header>
+            <div
+                data-dropdown-target="content"
+                class="hidden transition transform"
+                data-transition-enter="transition ease-out duration-200"
+                data-transition-enter-start="transform opacity-0 scale-95"
+                data-transition-enter-end="transform opacity-100 scale-200"
+                data-transition-leave="transition ease-in duration-75"
+                data-transition-leave-start="transform opacity-100 scale-200"
+                data-transition-leave-end="transform opacity-0 scale-95"
+            >
+                <ul class="flex flex-col mt-5 pt-5 border-t border-gray-100 space-y-2">
+                    <li><a href="#">Bootcamp</a></li>
+                    <li><a href="#">Starter Kit</a></li>
+                    <li><a href="#">GitHub</a></li>
+                </ul>
+
+                <div class="flex flex-col mt-5 pt-5 border-t border-gray-200 space-y-2 prose" data-action="click->dropdown#close">
+                    @yield('mobileIndex', $mobileIndex ?? '')
+                </div>
+            </div>
+        </div>
+    </nav>
+</div>

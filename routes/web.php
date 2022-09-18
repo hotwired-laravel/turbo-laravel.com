@@ -1,18 +1,32 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
+use Facades\App\Documentation;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
-*/
+if (! defined('DEFAULT_VERSION')) {
+    define('DEFAULT_VERSION', '1.x');
+}
 
-Route::get('/', function () {
-    return view('welcome');
+Route::redirect('/', '/docs/introduction');
+
+Route::get('docs/{page?}', function (?string $page) {
+    return redirect('/docs/' . DEFAULT_VERSION . '/' . ($page ?? 'introduction'));
+})->name('docs.index');
+
+Route::get('docs/{version}/{page?}', function (string $version, ?string $page = null) {
+    if (! Documentation::isVersion($version)) {
+        return redirect('/docs/' . DEFAULT_VERSION . '/'. $page, 301);
+    }
+
+    if (! Documentation::pageExistsInVersion($version, $page)) {
+        return redirect('/docs/' . $version . '/introduction', 301);
+    }
+
+    [$index, $content] = Documentation::render($version, $page ?? 'introduction');
+
+    return view('docs', [
+        'index' => $index,
+        'content' => $content,
+    ]);
 });
