@@ -12,7 +12,13 @@ If you want to work on this project locally, you may follow these instructions:
 git clone git@github.com:tonysm/turbo-laravel.com turbo-laravel.com
 ```
 
-2. We ship with a Laravel Sail setup, so you may pull the composer dependencies first:
+2. Copy the `.env.example` to `.env`:
+
+```bash
+cp .env.example .env
+```
+
+3. We ship with a Laravel Sail setup, so you may pull the composer dependencies first:
 
 ```bash
 # If you have PHP >=8.1 installed locally with Composer:
@@ -27,32 +33,32 @@ docker run --rm \
     composer install --ignore-platform-reqs
 ```
 
-3. Pull all docs versions from the lib:
+4. Pull all docs versions from the lib:
 
 ```bash
 ./bin/checkout-docs.sh
 ```
 
-4. Boot the containers:
+5. Boot the containers:
 
 ```bash
 sail up -d
 ```
 
-5. Download the Latest version of the TailwindCSS bin and start a watcher:
+6. Download the Latest version of the TailwindCSS bin and start a watcher:
 
 ```bash
 sail artisan tailwindcss:download
 sail artisan tailwindcss:watch
 ```
 
-6. Run the storage symlink command (needed for [Importmap Laravel](https://github.com/tonysm/importmap-laravel)):
+7. Run the storage symlink command (needed for [Importmap Laravel](https://github.com/tonysm/importmap-laravel)):
 
 ```bash
 sail artisan storage:link
 ```
 
-7. Open the browser at [http://localhost](http://localhost)
+8. Open the browser at [http://localhost](http://localhost)
 
 Alternatively, you may prefer to run the project another way. Make sure you
 
