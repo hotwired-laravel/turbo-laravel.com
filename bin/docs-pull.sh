@@ -11,6 +11,5 @@ for v in "${DOCS_VERSIONS[@]}"; do
     else
         echo "Cloning $v..."
         git clone --single-branch --branch "$v" git@github.com:tonysm/turbo-laravel.git "resources/sources/$v"
-        ln -s "${PWD}/resources/sources/$v/docs" "${PWD}/resources/docs/$v"
     fi;
 done

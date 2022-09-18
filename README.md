@@ -33,10 +33,21 @@ docker run --rm \
     composer install --ignore-platform-reqs
 ```
 
-4. Pull all docs versions from the lib:
+4. Pull all docs sources and create the docs symlinks:
+
+From your local machine (needs access your GitHub user to clone):
 
 ```bash
-./bin/checkout-docs.sh
+source ./bin/docs-pull.sh
+```
+
+Next, create the symlinks from sail:
+
+```bash
+# First, get a shell:
+sail shell
+# Next, create the symlinks:
+source bin/docs-symlinks.sh
 ```
 
 5. Boot the containers:
