@@ -19,7 +19,7 @@
     <nav class="md:hidden" data-controller="dropdown" data-dropdown-css-class="hidden">
         <div class="relative">
             <ul class="flex items-center justify-between">
-                <li><a href="#home" class="font-bold">Turbo Laravel</a></li>
+                <li><a href="/" class="font-bold">Turbo Laravel</a></li>
                 <li><button data-action="click->dropdown#toggle"><x-icons.bars-3 /></button></li>
             </ul>
 
