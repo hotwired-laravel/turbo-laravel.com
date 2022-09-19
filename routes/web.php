@@ -1,14 +1,13 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Str;
 use Facades\App\Documentation;
 
 if (! defined('DEFAULT_VERSION')) {
     define('DEFAULT_VERSION', '1.x');
 }
 
-Route::redirect('/', '/docs/introduction');
+Route::redirect('/', '/docs/' . DEFAULT_VERSION . '/introduction');
 
 Route::get('docs/{page?}', function (?string $page) {
     return redirect('/docs/' . DEFAULT_VERSION . '/' . ($page ?? 'introduction'));
