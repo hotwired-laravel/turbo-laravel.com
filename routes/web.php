@@ -7,7 +7,14 @@ if (! defined('DEFAULT_VERSION')) {
     define('DEFAULT_VERSION', '1.x');
 }
 
-Route::redirect('/', '/docs/' . DEFAULT_VERSION . '/introduction');
+Route::get('/', function () {
+    [$index, $content] = Documentation::render(DEFAULT_VERSION, 'introduction');
+
+    return view('docs', [
+        'index' => $index,
+        'content' => $content,
+    ]);
+});
 
 Route::get('docs/{page?}', function (?string $page) {
     return redirect('/docs/' . DEFAULT_VERSION . '/' . ($page ?? 'introduction'));
