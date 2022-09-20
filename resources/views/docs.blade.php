@@ -6,7 +6,7 @@
 
 @section('content')
     <div class="max-w-7xl w-full mx-auto px-5 lg:px-20 my-10 space-y-6">
-        <h1 class="text-center text-4xl md:text-8xl font-sans font-semibold">Turbo Laravel</h1>
+        <h1 class="text-center text-4xl md:text-8xl font-sans">Turbo Laravel</h1>
         <p class="text-xl text-center text-gray-900">An elegant way to combine <a href="https://hotwired.dev/" class="underline underline-offset-2 decoration-wavy font-semibold">Hotwire</a> and <a href="https://laravel.com/" class="underline underline-offset-2 decoration-wavy font-semibold">Laravel</a>.</p>
     </div>
 
@@ -15,7 +15,7 @@
             <div class="fancy-quote-mark" aria-hidden="true">
                 &ldquo;
             </div>
-            <p class="mb-4 text-gray-900 font-medium text-xl sm:text-3xl leading-tight">Hotwire is an alternative approach to building modern web applications without using much JavaScript by sending HTML instead of JSON over the wire.</p>
+            <p class="mb-4 text-gray-900 text-xl sm:text-3xl">Hotwire is an alternative approach to building modern web applications without using much JavaScript by sending HTML instead of JSON over the wire.</p>
             <cite class="flex items-center">
                 <div class="flex flex-col items-start">
                     <a

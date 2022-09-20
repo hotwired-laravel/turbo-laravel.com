@@ -7,6 +7,10 @@
     <meta name="csrf-token" content="{{ csrf_token() }}" />
     <title>@yield('title', $title ?? __('Turbo Laravel'))</title>
 
+    <!-- Fonts -->
+    <link rel="stylesheet" href="https://use.typekit.net/ins2wgm.css" />
+
+    <!-- Styles -->
     <link rel="stylesheet" href="{{ tailwindcss('css/app.css') }}" />
 
     <x-importmap-tags />

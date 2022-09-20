@@ -16,7 +16,7 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('docs/{page?}', function (?string $page) {
+Route::get('docs/{page?}', function (?string $page = null) {
     return redirect('/docs/' . DEFAULT_VERSION . '/' . ($page ?? 'introduction'));
 })->name('docs.index');
 

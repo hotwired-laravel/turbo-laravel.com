@@ -10,6 +10,10 @@ module.exports = {
     ],
     theme: {
         extend: {
+            fontFamily: {
+                sans: ['scandia-web', ...defaultTheme.fontFamily.sans],
+                mono: ['source-code-pro', ...defaultTheme.fontFamily.mono],
+            },
             transitionProperty: {
                 'width': 'width'
             },
