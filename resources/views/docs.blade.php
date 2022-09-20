@@ -35,13 +35,13 @@
     <hr class="mt-10" />
 
     <div class="max-w-7xl w-full mx-auto px-5 lg:px-20 flex md:space-x-6">
-        <aside data-nav-highlight-target="nav" class="hidden md:block py-10 sm:shrink-0 w-1/6 sm:w-1/4 overflow-hidden prose sm:prose-lg prose-a:font-light prose-a:no-underline [&_a:hover]:underline prose-a:underline-offset-2 [&>ul]:px-0 [&>ul]:font-semibold [&_a.active]:!font-medium [&_a.active]:text-blue-600 [&_a.active]:underline prose-ul:list-none pr-4 sm:border-r sm:border-gray-200">
+        <aside data-nav-highlight-target="nav" class="hidden md:block py-10 sm:shrink-0 w-1/6 sm:w-1/4 overflow-hidden prose prose-a:font-light prose-a:no-underline [&_a:hover]:underline prose-a:underline-offset-2 [&>ul]:px-0 [&>ul]:font-semibold [&_a.active]:!font-medium [&_a.active]:text-blue-600 [&_a.active]:underline prose-ul:list-none pr-4 sm:border-r sm:border-gray-200">
             {!! $index !!}
         </aside>
 
         <x-main-content class="block flex-1 h-full overflow-hidden">
             <x-turbo-frame id="docs-content" data-turbo-action="advance" data-action="turbo:frame-load->nav-highlight#highlightFromLoad" class="[&[busy]]:animate-pulse">
-                <article class="py-10 sm:px-5 prose sm:prose-lg prose-h1:text-center sm:prose-h1:text-left max-w-none w-full">
+                <article class="py-10 sm:px-5 prose prose-h1:text-center sm:prose-h1:text-left max-w-none w-full">
                     {!! $content !!}
                 </article>
             </x-turbo-frame>

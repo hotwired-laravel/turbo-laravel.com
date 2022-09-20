@@ -8,15 +8,14 @@
     <title>@yield('title', $title ?? __('Turbo Laravel'))</title>
 
     <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.bunny.net"/>
-    <link href="https://fonts.bunny.net/css?family=jost:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet" />
+    <link rel="stylesheet" href="https://use.typekit.net/ins2wgm.css">
 
     <!-- Styles -->
     <link rel="stylesheet" href="{{ tailwindcss('css/app.css') }}" />
 
     <x-importmap-tags />
 </head>
-<body class="antialiased text-lg">
+<body class="font-sans text-gray-900 antialiased">
     <div class="w-full min-h-screen bg-gray-50" data-controller="nav-highlight">
         <x-skip-to-main-content />
 
