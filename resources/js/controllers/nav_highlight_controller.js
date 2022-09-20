@@ -3,7 +3,9 @@ import { Controller } from "@hotwired/stimulus"
 // Connects to data-controller="nav-highlight"
 export default class extends Controller {
     static targets = ['nav'];
-    static classes = ['css'];
+    static values = {
+        css: { type: String, default: 'active' },
+    };
 
     connect() {
         this.navTargets.forEach(nav => {
@@ -41,10 +43,10 @@ export default class extends Controller {
 
     _highlightElement(nav, currentLink) {
         this._allLinks(nav).forEach(a => {
-            a.classList.remove(this.cssClass);
+            a.classList.remove(this.cssValue);
         });
 
-        currentLink.classList.add(this.cssClass);
+        currentLink.classList.add(this.cssValue);
     }
 
     _allLinks(nav) {

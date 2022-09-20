@@ -37,7 +37,7 @@
                     <li><a href="https://github.com/tonysm/turbo-laravel">GitHub</a></li>
                 </ul>
 
-                <div data-nav-highlight-target="nav" data-action="click->dropdown#close" class="flex flex-col mt-5 pt-5 border-t border-gray-100 space-y-2 prose [&>ul]:list-none [&>ul]:px-0">
+                <div data-nav-highlight-target="nav" data-action="click->dropdown#close" class="flex flex-col mt-5 pt-5 border-t border-gray-100 space-y-2 prose prose-a:font-light prose-a:no-underline [&_a:hover]:underline prose-a:underline-offset-2 [&>ul]:px-0 [&>ul]:font-semibold [&_a.active]:!font-medium [&_a.active]:text-blue-600 [&_a.active]:underline prose-ul:list-none [&>ul]:px-0">
                     @yield('mobileIndex', $mobileIndex ?? '')
                 </div>
             </div>
