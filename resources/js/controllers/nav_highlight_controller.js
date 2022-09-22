@@ -17,27 +17,9 @@ export default class extends Controller {
         })
     }
 
-    highlightFromLoad({ target }) {
-        if (! target.src) return;
-
-        this.navTargets.forEach(nav => {
-            let currentSelectedItem = this._findCurrentSelectedByHref(nav, target.src);
-
-            if (! currentSelectedItem) return;
-
-            this._highlightElement(nav, currentSelectedItem);
-        })
-    }
-
     _findCurrentSelectedItem(el) {
         return this._allLinks(el).find(a => {
             return a.href.endsWith(window.location.pathname);
-        });
-    }
-
-    _findCurrentSelectedByHref(nav, href) {
-        return this._allLinks(nav).find(a => {
-            return a.href === href;
         });
     }
 

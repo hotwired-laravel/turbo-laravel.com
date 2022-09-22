@@ -40,11 +40,9 @@
         </aside>
 
         <x-main-content class="block flex-1 h-full overflow-hidden">
-            <x-turbo-frame id="docs-content" data-turbo-action="advance" data-action="turbo:frame-load->nav-highlight#highlightFromLoad" class="[&[busy]]:animate-pulse">
-                <article class="py-10 sm:px-5 prose prose-h1:text-center sm:prose-h1:text-left max-w-none w-full">
-                    {!! $content !!}
-                </article>
-            </x-turbo-frame>
+            <article id="docs-content" class="py-10 sm:px-5 prose prose-h1:text-center sm:prose-h1:text-left max-w-none w-full">
+                {!! $content !!}
+            </article>
         </x-main-content>
     </div>
 @stop
