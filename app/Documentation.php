@@ -4,7 +4,6 @@ namespace App;
 
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Str;
 use SplFileInfo;
 
 class Documentation
@@ -15,10 +14,10 @@ class Documentation
 
     public function render(string $version, string $page): array
     {
-        $index = Cache::remember(md5($version . $page . '-index'), now()->addMinutes(5), fn () => $this->replaceIndexLinksWithTurboTarget(
+        $index = Cache::remember(md5($version . $page . '-index-v2'), now()->addMinutes(5), fn () => $this->replaceIndexLinksWithTurboTarget(
             $this->markdown->convert($this->replaceVersion($version, File::get(resource_path("docs/{$version}/index.md"))))
         ));
-        $content = Cache::remember(md5($version . $page . '-content'), now()->addMinutes(5), fn () => $this->markdown->convert($this->replaceVersion($version, File::get(resource_path("docs/{$version}/{$page}.md")))));
+        $content = Cache::remember(md5($version . $page . '-content-v2'), now()->addMinutes(5), fn () => $this->markdown->convert($this->replaceVersion($version, File::get(resource_path("docs/{$version}/{$page}.md")))));
 
         return [$index, $content];
     }
