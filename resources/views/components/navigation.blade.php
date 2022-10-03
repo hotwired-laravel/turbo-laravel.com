@@ -12,7 +12,8 @@
                     <x-inputs.text type="search" placeholder="Search..." name="search" class="w-40 focus:w-60" />
                 </form>
             </li>
-            <li><a href="https://github.com/tonysm/turbo-laravel" class="font-medium underline underline-offset-4">{{ __('GitHub') }}</a></li>
+            <li><a href="https://bootcamp.turbo-laravel.com" class="font-medium transition transform hover:underline underline-offset-4">{{ __('Bootcamp') }}</a></li>
+            <li><a href="https://github.com/tonysm/turbo-laravel" class="font-medium transition transform hover:underline underline-offset-4">{{ __('GitHub') }}</a></li>
         </ul>
     </nav>
 
