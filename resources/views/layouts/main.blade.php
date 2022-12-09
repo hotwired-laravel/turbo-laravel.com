@@ -21,9 +21,11 @@
 
         <header class="bg-white shadow-sm py-5">
             <x-navigation>
+                @if ($mobileIndex ?? false)
                 <x-slot:mobileIndex>
-                    @yield('mobileIndex', $mobileIndex ?? '')
+                    @yield('mobileIndex', $mobileIndex)
                 </x-slot>
+                @endif
             </x-navigation>
             @yield('afterHeader', $afterHeader ?? '')
         </header>

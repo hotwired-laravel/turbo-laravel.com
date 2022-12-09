@@ -12,9 +12,10 @@
 
         <!-- Right Side -->
         <ul class="flex items-center space-x-8">
+            <li><a href="https://turbo-laravel.com/docs" class="font-mono font-semibold transition transform hover:underline underline-offset-4">{{ __('Documentation') }}</a></li>
             <li><a href="https://bootcamp.turbo-laravel.com" class="font-mono font-semibold transition transform hover:underline underline-offset-4">{{ __('Bootcamp') }}</a></li>
             <li><a href="https://github.com/tonysm/turbo-laravel" class="font-mono font-semibold transition transform hover:underline underline-offset-4">{{ __('GitHub') }}</a></li>
-            <li>
+            <li class="hidden">
                 <form action="">
                     <x-inputs.text type="search" placeholder="Search..." name="search" class="w-50 focus:w-60" />
                 </form>
@@ -40,12 +41,16 @@
                 data-transition-leave-end="transform opacity-0 scale-95"
             >
                 <ul class="flex flex-col mt-5 pt-5 border-t border-gray-100 space-y-2">
+                    <li><a href="https://turbo-laravel.com/docs">Documentation</a></li>
+                    <li><a href="https://bootcamp.turbo-laravel.com">Bootcamp</a></li>
                     <li><a href="https://github.com/tonysm/turbo-laravel">GitHub</a></li>
                 </ul>
 
+                @if ($mobileIndex ?? false)
                 <div data-nav-highlight-target="nav" data-action="click->dropdown#close" class="flex flex-col mt-5 pt-5 border-t border-gray-100 space-y-2 prose prose-a:font-light prose-a:no-underline [&_a:hover]:underline prose-a:underline-offset-2 [&>ul]:px-0 [&>ul]:font-semibold [&_a.active]:!font-medium [&_a.active]:text-blue-600 [&_a.active]:underline prose-ul:list-none [&>ul]:px-0">
-                    @yield('mobileIndex', $mobileIndex ?? '')
+                    @yield('mobileIndex', $mobileIndex)
                 </div>
+                @endif
             </div>
         </div>
     </nav>

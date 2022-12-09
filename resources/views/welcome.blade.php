@@ -1,9 +1,5 @@
 @extends('layouts.main')
 
-@section('mobileIndex')
-    {!! $index ?? '' !!}
-@stop
-
 @section('content')
     <div class="bg-red-50 w-full py-16 px-5 lg:px-20">
         <div class="max-w-7xl w-full mx-auto space-y-8">
