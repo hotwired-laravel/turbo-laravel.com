@@ -12,7 +12,7 @@ Route::get('/', function () {
 });
 
 Route::get('docs/{page?}', function (?string $page = null) {
-    return redirect('/docs/' . DEFAULT_VERSION . '/' . ($page ?? 'introduction'));
+    return redirect('/docs/' . DEFAULT_VERSION . '/' . ($page ?? 'installation'));
 })->name('docs.index');
 
 Route::get('docs/{version}/{page?}', function (string $version, ?string $page = null) {
@@ -21,10 +21,10 @@ Route::get('docs/{version}/{page?}', function (string $version, ?string $page = 
     }
 
     if (! Documentation::pageExistsInVersion($version, $page)) {
-        return redirect('/docs/' . $version . '/introduction', 301);
+        return redirect('/docs/' . $version . '/installation', 301);
     }
 
-    [$index, $content] = Documentation::render($version, $page ?? 'introduction');
+    [$index, $content] = Documentation::render($version, $page ?? 'installation');
 
     return view('docs', [
         'index' => $index,
