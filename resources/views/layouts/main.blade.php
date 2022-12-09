@@ -16,7 +16,7 @@
     <x-importmap-tags />
 </head>
 <body class="font-sans text-gray-900 antialiased">
-    <div class="w-full min-h-screen bg-gray-50" data-controller="nav-highlight">
+    <div class="w-full min-h-screen flex flex-col justify-between bg-gray-50" data-controller="nav-highlight">
         <x-skip-to-main-content />
 
         <header class="bg-white shadow-sm py-5">
@@ -28,9 +28,9 @@
             @yield('afterHeader', $afterHeader ?? '')
         </header>
 
-        @yield('content', $slot ?? '')
+        <div class="flex-1">@yield('content', $slot ?? '')</div>
 
-        <x-footer class="py-4 px-8 sm:px-20 bg-gray-600 text-white" />
+        <x-footer class="py-4 px-8 sm:px-20 bg-slate-700 text-white" />
     </div>
 </body>
 </html>

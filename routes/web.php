@@ -8,12 +8,7 @@ if (! defined('DEFAULT_VERSION')) {
 }
 
 Route::get('/', function () {
-    [$index, $content] = Documentation::render(DEFAULT_VERSION, 'introduction');
-
-    return view('docs', [
-        'index' => $index,
-        'content' => $content,
-    ]);
+    return view('welcome');
 });
 
 Route::get('docs/{page?}', function (?string $page = null) {

@@ -2,18 +2,23 @@
     <nav class="hidden md:flex items-center justify-between">
         <!-- Left Side -->
         <ul class="flex items-center space-x-4">
-            <li><a href="/" class="font-semibold text-2xl">{{ __('Turbo Laravel') }}</a></li>
+            <li>
+                <a href="/" class="font-semibold text-2xl flex items-center space-x-2">
+                    <img class="w-12 h-12" src="{{ asset('/images/nav-logo.png') }}" alt="Nav Logo" />
+                    <span>{{ __('Turbo Laravel') }}</span>
+                </a>
+            </li>
         </ul>
 
         <!-- Right Side -->
-        <ul class="flex items-center space-x-5">
+        <ul class="flex items-center space-x-8">
+            <li><a href="https://bootcamp.turbo-laravel.com" class="font-mono font-semibold transition transform hover:underline underline-offset-4">{{ __('Bootcamp') }}</a></li>
+            <li><a href="https://github.com/tonysm/turbo-laravel" class="font-mono font-semibold transition transform hover:underline underline-offset-4">{{ __('GitHub') }}</a></li>
             <li>
                 <form action="">
-                    <x-inputs.text type="search" placeholder="Search..." name="search" class="w-40 focus:w-60" />
+                    <x-inputs.text type="search" placeholder="Search..." name="search" class="w-50 focus:w-60" />
                 </form>
             </li>
-            <li><a href="https://bootcamp.turbo-laravel.com" class="font-medium transition transform hover:underline underline-offset-4">{{ __('Bootcamp') }}</a></li>
-            <li><a href="https://github.com/tonysm/turbo-laravel" class="font-medium transition transform hover:underline underline-offset-4">{{ __('GitHub') }}</a></li>
         </ul>
     </nav>
 
