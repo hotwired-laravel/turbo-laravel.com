@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
     <title>@yield('title', $title ?? __('Turbo Laravel'))</title>
+    <x-social-media-tags />
 
     <!-- Fonts -->
     <link rel="stylesheet" href="https://use.typekit.net/ins2wgm.css">
