@@ -9,7 +9,7 @@ if (! defined('DEFAULT_VERSION')) {
 
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('welcome');
 
 Route::get('docs/{page?}', function (?string $page = null) {
     return redirect('/docs/' . DEFAULT_VERSION . '/' . ($page ?? 'installation'));

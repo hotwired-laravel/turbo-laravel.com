@@ -27,7 +27,7 @@
     <div class="w-full min-h-screen flex flex-col justify-between bg-gray-50" data-controller="nav-highlight">
         <x-skip-to-main-content />
 
-        <header class="bg-white shadow-sm py-5">
+        <header @class(["py-8", "shadow-sm" => ! request()->routeIs('welcome')])>
             <x-navigation>
                 @if ($mobileIndex ?? false)
                 <x-slot:mobileIndex>
@@ -35,12 +35,15 @@
                 </x-slot>
                 @endif
             </x-navigation>
+
             @yield('afterHeader', $afterHeader ?? '')
         </header>
 
         <div class="flex-1">@yield('content', $slot ?? '')</div>
 
-        <x-footer class="py-4 px-8 sm:px-20 bg-slate-700 text-white" />
+        <hr class="my-10 w-32 mx-auto border-gray-300 shadow-sm rounded-full" />
+
+        <x-footer class="py-4 px-8 sm:px-20" />
     </div>
 </body>
 </html>
