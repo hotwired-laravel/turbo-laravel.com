@@ -25,12 +25,12 @@
                     <a href="/docs/turbo-streams" class="inline-block text-sm rounded-full border-2 border-black px-4 py-2">Learn More</a>
                 </div>
                 <div class="flex-1 flex items-center justify-end">
-                    <img loading="lazy" class="-rotate-3 md:rotate-0" src="{{ asset('/images/turbo-streams-home.jpg') }}" alt="Turbo Streams example code" />
+                    <img loading="lazy" class="-rotate-3 mix-blend-darken md:rotate-0" src="{{ asset('/images/turbo-streams-home.jpg') }}" alt="Turbo Streams example code" />
                 </div>
             </div>
             <div class="flex flex-col space-y-4 md:space-y-0 md:flex-row md:space-x-8">
                 <div class="flex-1 hidden md:flex items-center justify-start">
-                    <img loading="lazy" class="rotate-3 md:rotate-0" src="{{ asset('/images/broadcasting-home.jpg') }}" alt="Example of broadcasting code using the lib." />
+                    <img loading="lazy" class="rotate-3 mix-blend-darken md:rotate-0" src="{{ asset('/images/broadcasting-home.jpg') }}" alt="Example of broadcasting code using the lib." />
                 </div>
 
                 <div class="max-w-sm space-y-4">
@@ -41,7 +41,7 @@
                 </div>
 
                 <div class="flex-1 flex md:hidden items-center justify-start">
-                    <img loading="lazy" class="rotate-3 md:rotate-0" src="{{ asset('/images/broadcasting-home.jpg') }}" alt="Example of broadcasting code using the lib." />
+                    <img loading="lazy" class="rotate-3 mix-blend-darken md:rotate-0" src="{{ asset('/images/broadcasting-home.jpg') }}" alt="Example of broadcasting code using the lib." />
                 </div>
             </div>
             <div class="flex flex-col space-y-4 md:space-y-0 md:flex-row md:space-x-8">
@@ -51,7 +51,7 @@
                     <a href="/docs/testing" class="inline-block text-sm rounded-full border-2 border-black px-4 py-2">Learn More</a>
                 </div>
                 <div class="flex-1 flex items-center justify-end">
-                    <img loading="lazy" class="-rotate-3 md:rotate-0" src="{{ asset('/images/testing-home.jpg') }}" alt="Example code of testing helpers" />
+                    <img loading="lazy" class="-rotate-3 mix-blend-darken md:rotate-0" src="{{ asset('/images/testing-home.jpg') }}" alt="Example code of testing helpers" />
                 </div>
             </div>
         </div>
