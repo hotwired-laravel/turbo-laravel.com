@@ -55,15 +55,7 @@
             appId: '6JF81FAX88',
             apiKey: 'b23e86ea68b3173af972c611e98cf7c4',
             indexName: 'turbo-laravel',
-            container: '#algolia-search-mobile',
-            debug: false,
-        });
-
-        docsearch({
-            appId: '6JF81FAX88',
-            apiKey: 'b23e86ea68b3173af972c611e98cf7c4',
-            indexName: 'turbo-laravel',
-            container: '#algolia-search-web',
+            container: '#algolia-search',
             debug: false,
         });
     </script>

@@ -1,34 +1,25 @@
-<div class="max-w-7xl mx-auto w-full font-sans px-5 lg:px-20">
-    <nav class="hidden md:flex items-center justify-between">
-        <!-- Left Side -->
-        <ul class="flex items-center space-x-4">
-            <li>
-                <a href="/" class="font-semibold text-2xl flex items-center space-x-2">
-                    <span>{{ __('Turbo Laravel') }}</span>
-                </a>
-            </li>
-        </ul>
+<div class="max-w-7xl mx-auto w-full font-sans px-5 lg:px-20" data-controller="dropdown" data-dropdown-css-class="hidden">
+    <nav>
+        <div class="flex items-center justify-between">
+            <!-- Left Side -->
+            <ul class="flex items-center space-x-4">
+                <li>
+                    <a href="/" class="font-semibold text-2xl flex items-center space-x-2">
+                        <span>{{ __('Turbo Laravel') }}</span>
+                    </a>
+                </li>
+            </ul>
+            <!-- Right Side -->
+            <ul class="flex items-center space-x-4 sm:space-x-8">
+                <li class="hidden md:block"><a href="/docs" class="transition transform hover:underline underline-offset-4">{{ __('Documentation') }}</a></li>
+                <li class="hidden md:block"><a href="https://bootcamp.turbo-laravel.com" class="transition transform hover:underline underline-offset-4">{{ __('Bootcamp') }}</a></li>
+                <li class="hidden md:block"><a href="https://github.com/tonysm/turbo-laravel" class="transition transform hover:underline underline-offset-4">{{ __('GitHub') }}</a></li>
+                <li><div data-turbo-permanent id="algolia-search"></div></li>
+                <li class="md:hidden"><button data-action="click->dropdown#toggle"><x-icons.bars-3 /></button></li>
+            </ul>
+        </div>
 
-        <!-- Right Side -->
-        <ul class="flex items-center space-x-8">
-            <li><a href="/docs" class="transition transform hover:underline underline-offset-4">{{ __('Documentation') }}</a></li>
-            <li><a href="https://bootcamp.turbo-laravel.com" class="transition transform hover:underline underline-offset-4">{{ __('Bootcamp') }}</a></li>
-            <li><a href="https://github.com/tonysm/turbo-laravel" class="transition transform hover:underline underline-offset-4">{{ __('GitHub') }}</a></li>
-            <li><div data-turbo-permanent id="algolia-search-web"></div></li>
-        </ul>
-    </nav>
-
-    <nav class="md:hidden" data-controller="dropdown" data-dropdown-css-class="hidden">
         <div class="relative">
-            <div class="flex items-center justify-between">
-                <a href="/" class="font-bold">Turbo Laravel</a>
-
-                <div class="flex items-center space-x-4">
-                    <div data-turbo-permanent id="algolia-search-mobile"></div>
-                    <button data-action="click->dropdown#toggle"><x-icons.bars-3 /></button>
-                </div>
-            </div>
-
             <div
                 data-dropdown-target="content"
                 class="hidden transition transform"
