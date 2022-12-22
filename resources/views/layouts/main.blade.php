@@ -13,6 +13,9 @@
     <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('/favicon-16x16.png') }}">
     <link rel="manifest" href="{{ asset('/site.webmanifest') }}">
 
+    <!-- Algolia Search -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@docsearch/css@3"/>
+
     <x-social-media-tags />
 
     <!-- Fonts -->
@@ -45,5 +48,24 @@
 
         <x-footer class="py-4 px-8 sm:px-20" />
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@docsearch/js@3" data-turbo-eval="false"></script>
+    <script type="text/javascript" data-turbo-eval="false">
+        docsearch({
+            appId: '6JF81FAX88',
+            apiKey: 'b23e86ea68b3173af972c611e98cf7c4',
+            indexName: 'turbo-laravel',
+            container: '#algolia-search-mobile',
+            debug: false,
+        });
+
+        docsearch({
+            appId: '6JF81FAX88',
+            apiKey: 'b23e86ea68b3173af972c611e98cf7c4',
+            indexName: 'turbo-laravel',
+            container: '#algolia-search-web',
+            debug: false,
+        });
+    </script>
 </body>
 </html>

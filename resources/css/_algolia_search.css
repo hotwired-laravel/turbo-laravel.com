@@ -1,0 +1,20 @@
+.DocSearch-Button {
+    background-color: #f3f3f3;
+    border: 1px solid #cecece;
+    transition: all .1s ease-in-out;
+    margin: 0;
+}
+
+.DocSearch-Button:focus, .DocSearch-Button:active, .DocSearch-Button:hover {
+    outline: revert !important;
+    background-color: #f5f5f5;
+    box-shadow: none;
+}
+
+.DocSearch-Input {
+    background-color: transparent;
+}
+
+.DocSearch-Input:focus {
+    box-shadow: none;
+}

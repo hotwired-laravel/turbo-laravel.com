@@ -14,20 +14,20 @@
             <li><a href="/docs" class="transition transform hover:underline underline-offset-4">{{ __('Documentation') }}</a></li>
             <li><a href="https://bootcamp.turbo-laravel.com" class="transition transform hover:underline underline-offset-4">{{ __('Bootcamp') }}</a></li>
             <li><a href="https://github.com/tonysm/turbo-laravel" class="transition transform hover:underline underline-offset-4">{{ __('GitHub') }}</a></li>
-            <li class="hidden">
-                <form action="">
-                    <x-inputs.text type="search" placeholder="Search..." name="search" class="w-50 focus:w-60" />
-                </form>
-            </li>
+            <li><div data-turbo-permanent id="algolia-search-web"></div></li>
         </ul>
     </nav>
 
     <nav class="md:hidden" data-controller="dropdown" data-dropdown-css-class="hidden">
         <div class="relative">
-            <ul class="flex items-center justify-between">
-                <li><a href="/" class="font-bold">Turbo Laravel</a></li>
-                <li><button data-action="click->dropdown#toggle"><x-icons.bars-3 /></button></li>
-            </ul>
+            <div class="flex items-center justify-between">
+                <a href="/" class="font-bold">Turbo Laravel</a>
+
+                <div class="flex items-center space-x-4">
+                    <div data-turbo-permanent id="algolia-search-mobile"></div>
+                    <button data-action="click->dropdown#toggle"><x-icons.bars-3 /></button>
+                </div>
+            </div>
 
             <div
                 data-dropdown-target="content"
