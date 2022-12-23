@@ -17,6 +17,7 @@ class Documentation
         $index = Cache::remember(md5($version . $page . '-index-v2'), now()->addMinutes(5), fn () => $this->replaceIndexLinksWithTurboTarget(
             $this->markdown->convert($this->replaceVersion($version, File::get(resource_path("docs/{$version}/index.md"))))
         ));
+
         $content = Cache::remember(md5($version . $page . '-content-v2'), now()->addMinutes(5), fn () => $this->markdown->convert($this->replaceVersion($version, File::get(resource_path("docs/{$version}/{$page}.md")))));
 
         return [$index, $content];

@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Markdown\CalloutExtension;
 use League\CommonMark\Environment\Environment;
 use League\CommonMark\Extension\Attributes\AttributesExtension;
 use League\CommonMark\Extension\CommonMark\CommonMarkCoreExtension;
@@ -22,6 +23,7 @@ class Markdown
     {
         $environment = new Environment([]);
         $environment->addExtension(new CommonMarkCoreExtension());
+        $environment->addExtension(new CalloutExtension());
         $environment->addExtension(new GithubFlavoredMarkdownExtension());
         $environment->addExtension(new AttributesExtension());
         $environment->addExtension(new TorchlightExtension());
