@@ -15,10 +15,18 @@ class Documentation
     public function render(string $version, string $page): array
     {
         $index = Cache::remember(md5($version . $page . '-index-v1'), now()->addMinutes(5), fn () => $this->replaceIndexLinksWithTurboTarget(
-            $this->markdown->convert($this->replaceVersion($version, File::get(resource_path("docs/{$version}/index.md"))))
+            $this->markdown->convert(File::get(resource_path("docs/{$version}/index.md")), [
+                'docs_version' => [
+                    'current_version' => $version,
+                ],
+            ])
         ));
 
-        $content = Cache::remember(md5($version . $page . '-content-v1'), now()->addMinutes(5), fn () => $this->markdown->convert($this->replaceVersion($version, File::get(resource_path("docs/{$version}/{$page}.md")))));
+        $content = Cache::remember(md5($version . $page . '-content-v1'), now()->addMinutes(5), fn () => $this->markdown->convert(File::get(resource_path("docs/{$version}/{$page}.md")), [
+            'docs_version' => [
+                'current_version' => $version,
+            ],
+        ]));
 
         return [$index, $content];
     }
@@ -28,15 +36,6 @@ class Documentation
         return str_replace(
             '<a ',
             '<a data-turbo-frame="docs-content" ',
-            $content,
-        );
-    }
-
-    public function replaceVersion(string $version, string $content)
-    {
-        return str_replace(
-            '{{version}}',
-            $version,
             $content,
         );
     }

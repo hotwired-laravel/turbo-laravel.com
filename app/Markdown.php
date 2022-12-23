@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Markdown\CalloutExtension;
+use App\Markdown\DocsVersionExtension;
 use League\CommonMark\Environment\Environment;
 use League\CommonMark\Extension\Attributes\AttributesExtension;
 use League\CommonMark\Extension\CommonMark\CommonMarkCoreExtension;
@@ -14,16 +15,21 @@ use Torchlight\Commonmark\V2\TorchlightExtension;
 
 class Markdown
 {
-    private MarkdownConverter $converter;
+    private ?MarkdownConverter $converter = null;
 
-    public function __construct(?MarkdownConverter $converter = null)
+    public function convert(string $content, array $configs = []): string
     {
-        $this->converter = $converter ?? $this->makeConverter();
+        return $this->buildConverter($configs)->convert($content);
     }
 
-    private function makeConverter(): MarkdownConverter
+    private function buildConverter(array $configs)
     {
-        $environment = new Environment([
+        return $this->converter ??= $this->makeConverter($configs);
+    }
+
+    private function makeConverter(array $configs = []): MarkdownConverter
+    {
+        $environment = new Environment(array_replace_recursive([
             'table_of_contents' => [
                 'html_class' => 'table-of-contents',
                 'position' => 'placeholder',
@@ -39,8 +45,9 @@ class Markdown
                 'symbol' => '¶',
                 'title' => "Permalink",
             ],
-        ]);
+        ], $configs));
 
+        $environment->addExtension(new DocsVersionExtension());
         $environment->addExtension(new CommonMarkCoreExtension());
         $environment->addExtension(new CalloutExtension());
         $environment->addExtension(new GithubFlavoredMarkdownExtension());
@@ -50,10 +57,5 @@ class Markdown
         $environment->addExtension(new TableOfContentsExtension());
 
         return new MarkdownConverter($environment);
-    }
-
-    public function convert(string $content): string
-    {
-        return $this->converter->convert($content);
     }
 }
