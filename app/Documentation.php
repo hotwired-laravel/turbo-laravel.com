@@ -14,30 +14,20 @@ class Documentation
 
     public function render(string $version, string $page): array
     {
-        $index = Cache::remember(md5($version . $page . '-index-v1'), now()->addMinutes(5), fn () => $this->replaceIndexLinksWithTurboTarget(
-            $this->markdown->convert(File::get(resource_path("docs/{$version}/index.md")), [
-                'docs_version' => [
-                    'current_version' => $version,
-                ],
-            ])
-        ));
+        $index = Cache::remember(md5($version . $page . '-index-v1'), now()->addMinutes(5), fn () => $this->markdown->convert(File::get(resource_path("docs/{$version}/index.md")), [
+            'docs_links' => [
+                'frame' => 'docs-content',
+                'current_version' => $version,
+            ],
+        ]));
 
         $content = Cache::remember(md5($version . $page . '-content-v1'), now()->addMinutes(5), fn () => $this->markdown->convert(File::get(resource_path("docs/{$version}/{$page}.md")), [
-            'docs_version' => [
+            'docs_links' => [
                 'current_version' => $version,
             ],
         ]));
 
         return [$index, $content];
-    }
-
-    private function replaceIndexLinksWithTurboTarget(string $content)
-    {
-        return str_replace(
-            '<a ',
-            '<a data-turbo-frame="docs-content" ',
-            $content,
-        );
     }
 
     public function isVersion(string $version)

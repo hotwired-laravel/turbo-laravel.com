@@ -3,7 +3,9 @@
 namespace App;
 
 use App\Markdown\CalloutExtension;
+use App\Markdown\DocsLinksExtension;
 use App\Markdown\DocsVersionExtension;
+use App\Markdown\LinksToTurboFrameExtension;
 use League\CommonMark\Environment\Environment;
 use League\CommonMark\Extension\Attributes\AttributesExtension;
 use League\CommonMark\Extension\CommonMark\CommonMarkCoreExtension;
@@ -15,16 +17,9 @@ use Torchlight\Commonmark\V2\TorchlightExtension;
 
 class Markdown
 {
-    private ?MarkdownConverter $converter = null;
-
     public function convert(string $content, array $configs = []): string
     {
-        return $this->buildConverter($configs)->convert($content);
-    }
-
-    private function buildConverter(array $configs)
-    {
-        return $this->converter ??= $this->makeConverter($configs);
+        return $this->makeConverter($configs)->convert($content);
     }
 
     private function makeConverter(array $configs = []): MarkdownConverter
@@ -47,7 +42,7 @@ class Markdown
             ],
         ], $configs));
 
-        $environment->addExtension(new DocsVersionExtension());
+        $environment->addExtension(new DocsLinksExtension());
         $environment->addExtension(new CommonMarkCoreExtension());
         $environment->addExtension(new CalloutExtension());
         $environment->addExtension(new GithubFlavoredMarkdownExtension());

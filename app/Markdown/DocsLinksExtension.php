@@ -13,21 +13,24 @@ use League\CommonMark\Util\HtmlElement;
 use League\Config\ConfigurationBuilderInterface;
 use Nette\Schema\Expect;
 
-class DocsVersionExtension implements ExtensionInterface, NodeRendererInterface, ConfigurableExtensionInterface
+class DocsLinksExtension implements ExtensionInterface, NodeRendererInterface, ConfigurableExtensionInterface
 {
     private string $currentVersion;
+    private ?string $frame;
 
     public function configureSchema(ConfigurationBuilderInterface $builder): void
     {
-        $builder->addSchema('docs_version', Expect::structure([
+        $builder->addSchema('docs_links', Expect::structure([
             'current_version' => Expect::string()->default(DEFAULT_VERSION),
+            'frame' => Expect::string()->default(''),
         ]));
     }
 
     public function register(EnvironmentBuilderInterface $environment): void
     {
-        if ($environment->getConfiguration()->exists('docs_version')) {
-            $this->currentVersion = $environment->getConfiguration()->get('docs_version/current_version');
+        if ($environment->getConfiguration()->exists('docs_links')) {
+            $this->currentVersion = $environment->getConfiguration()->get('docs_links/current_version');
+            $this->frame = $environment->getConfiguration()->get('docs_links/frame') ?: null;
 
             $environment->addRenderer(Link::class, $this, 10);
         }
@@ -45,6 +48,7 @@ class DocsVersionExtension implements ExtensionInterface, NodeRendererInterface,
         return new HtmlElement('a', array_filter([
             'title' => $node->getTitle() ?: null,
             'href' => str_replace(urlencode('{{version}}'), $this->currentVersion, $node->getUrl()),
+            'data-turbo-frame' => $this->frame,
         ]), $childRenderer->renderNodes($node->children()));
     }
 }
