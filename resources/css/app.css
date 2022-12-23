@@ -4,4 +4,5 @@
 @import "./_blockquotes";
 @import "./_turbo_progress";
 @import "./_code";
-@import "./_algolia_search"
+@import "./_algolia_search";
+@import "./_markdown";
