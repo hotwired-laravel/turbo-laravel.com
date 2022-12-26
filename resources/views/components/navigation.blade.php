@@ -11,7 +11,7 @@
             </ul>
             <!-- Right Side -->
             <ul class="flex items-center space-x-4 sm:space-x-8">
-                <li class="hidden md:block"><a href="/docs" class="transition transform hover:underline underline-offset-4">{{ __('Documentation') }}</a></li>
+                <li class="hidden md:block"><a href="{{ route('docs.index') }}" class="transition transform hover:underline underline-offset-4">{{ __('Documentation') }}</a></li>
                 <li class="hidden md:block"><a href="https://bootcamp.turbo-laravel.com" class="transition transform hover:underline underline-offset-4">{{ __('Bootcamp') }}</a></li>
                 <li class="hidden md:block"><a href="https://github.com/tonysm/turbo-laravel" class="transition transform hover:underline underline-offset-4">{{ __('GitHub') }}</a></li>
                 <li><div data-turbo-permanent id="algolia-search"></div></li>
@@ -31,7 +31,7 @@
                 data-transition-leave-end="transform opacity-0 scale-95"
             >
                 <ul class="flex flex-col mt-5 pt-5 border-t border-gray-100 space-y-2">
-                    <li><a href="https://turbo-laravel.com/docs">Documentation</a></li>
+                    <li><a href="{{ route('docs.index') }}">Documentation</a></li>
                     <li><a href="https://bootcamp.turbo-laravel.com">Bootcamp</a></li>
                     <li><a href="https://github.com/tonysm/turbo-laravel">GitHub</a></li>
                 </ul>

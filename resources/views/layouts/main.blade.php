@@ -32,11 +32,9 @@
 
         <header @class(["py-8", "shadow-sm" => ! request()->routeIs('welcome')])>
             <x-navigation>
-                @if ($mobileIndex ?? false)
                 <x-slot:mobileIndex>
-                    @yield('mobileIndex', $mobileIndex)
+                    @yield('mobileIndex', $mobileIndex ?? '')
                 </x-slot>
-                @endif
             </x-navigation>
 
             @yield('afterHeader', $afterHeader ?? '')
