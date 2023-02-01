@@ -9,7 +9,7 @@ If you want to work on this project locally, you may follow these instructions:
 1. Checkout the source code:
 
 ```bash
-git clone git@github.com:tonysm/turbo-laravel.com turbo-laravel.com
+git clone git@github.com:hotwired/turbo-laravel.com turbo-laravel.com
 ```
 
 2. Copy the `.env.example` to `.env`:

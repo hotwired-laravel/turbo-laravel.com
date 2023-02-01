@@ -10,6 +10,6 @@ for v in "${DOCS_VERSIONS[@]}"; do
         (cd resources/sources/$v && git pull)
     else
         echo "Cloning $v..."
-        git clone --single-branch --branch "$v" git@github.com:tonysm/turbo-laravel.git "resources/sources/$v"
+        git clone --single-branch --branch "$v" git@github.com:hotwired/turbo-laravel.git "resources/sources/$v"
     fi;
 done
