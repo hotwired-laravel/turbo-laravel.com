@@ -60,7 +60,7 @@
 
         <div class="md:max-w-5xl mx-auto space-y-8">
             <h4 class="text-5xl font-semibold text-center">The Bootcamp</h4>
-            <p class="text-lg text-center">In order to help you to get a better understanding of the many sides of Hotwire, we offer a free Bootcamp inspired by the oficial Laravel Bootcamp. In the Turbo Laravel Bootcamp, you’ll get a hands-on introduction to Hotwire and Turbo Laravel building a web application from scratch and then building the hybrid native app for it.</p>
+            <p class="text-lg text-center">In order to help you to get a better understanding of the many sides of Hotwire, we offer a free Bootcamp inspired by the official Laravel Bootcamp. In the Turbo Laravel Bootcamp, you’ll get a hands-on introduction to Hotwire and Turbo Laravel building a web application from scratch and then building the hybrid native app for it.</p>
             <div class="flex items-center justify-center"><a href="https://bootcamp.turbo-laravel.com" class="text-2xl px-4 py-2 rounded-full border-2 border-black">Start Learning</a></div>
         </div>
     </div>
