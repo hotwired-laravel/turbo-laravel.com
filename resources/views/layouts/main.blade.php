@@ -26,8 +26,8 @@
 
     <x-importmap-tags />
 </head>
-<body class="font-sans text-gray-900 antialiased">
-    <div class="w-full min-h-screen flex flex-col justify-between bg-gray-50" data-controller="nav-highlight">
+<body class="font-sans antialiased text-gray-900">
+    <div class="flex flex-col justify-between w-full min-h-screen bg-gray-50" data-controller="nav-highlight">
         <x-skip-to-main-content />
 
         <header @class(["py-8", "shadow-sm" => ! request()->routeIs('welcome')])>
@@ -42,9 +42,9 @@
 
         <div class="flex-1">@yield('content', $slot ?? '')</div>
 
-        <hr class="my-10 w-32 mx-auto border-gray-300 shadow-sm rounded-full" />
+        <hr class="w-32 mx-auto my-10 border-gray-300 rounded-full shadow-sm" />
 
-        <x-footer class="py-4 px-8 sm:px-20" />
+        <x-footer class="px-8 py-4 sm:px-20" />
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@docsearch/js@3" data-turbo-eval="false"></script>
