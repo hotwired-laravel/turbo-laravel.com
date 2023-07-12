@@ -30,9 +30,14 @@ class Documentation
         return [$index, $content];
     }
 
+    public static function getVersions(): array
+    {
+        return ['2.x', '1.x'];
+    }
+
     public function isVersion(string $version)
     {
-        return in_array($version, ['1.x'], true);
+        return in_array($version, self::getVersions(), true);
     }
 
     public function pageExistsInVersion(string $version, string $page)

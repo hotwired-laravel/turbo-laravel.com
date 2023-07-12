@@ -1,10 +1,10 @@
-<div class="max-w-7xl mx-auto w-full font-sans px-5 lg:px-20" data-controller="dropdown" data-dropdown-css-class="hidden">
+<div class="w-full px-5 mx-auto font-sans max-w-7xl lg:px-20" data-controller="dropdown" data-dropdown-css-class="hidden">
     <nav>
         <div class="flex items-center justify-between">
             <!-- Left Side -->
             <ul class="flex items-center space-x-4">
                 <li>
-                    <a href="/" class="font-semibold text-2xl flex items-center space-x-2">
+                    <a href="/" class="flex items-center space-x-2 text-2xl font-semibold">
                         <span>{{ __('Turbo Laravel') }}</span>
                     </a>
                 </li>
@@ -14,6 +14,7 @@
                 <li class="hidden md:block"><a href="{{ route('docs.index') }}" class="transition transform hover:underline underline-offset-4">{{ __('Documentation') }}</a></li>
                 <li class="hidden md:block"><a href="https://bootcamp.turbo-laravel.com" class="transition transform hover:underline underline-offset-4">{{ __('Bootcamp') }}</a></li>
                 <li class="hidden md:block"><a href="https://github.com/tonysm/turbo-laravel" class="transition transform hover:underline underline-offset-4">{{ __('GitHub') }}</a></li>
+                {{ $navLinks ?? '' }}
                 <li><div data-turbo-permanent id="algolia-search"></div></li>
                 <li class="md:hidden"><button data-action="click->dropdown#toggle"><x-icons.bars-3 /></button></li>
             </ul>
@@ -30,7 +31,7 @@
                 data-transition-leave-start="transform opacity-100 scale-200"
                 data-transition-leave-end="transform opacity-0 scale-95"
             >
-                <ul class="flex flex-col mt-5 pt-5 border-t border-gray-100 space-y-2">
+                <ul class="flex flex-col pt-5 mt-5 space-y-2 border-t border-gray-100">
                     <li><a href="{{ route('docs.index') }}">Documentation</a></li>
                     <li><a href="https://bootcamp.turbo-laravel.com">Bootcamp</a></li>
                     <li><a href="https://github.com/tonysm/turbo-laravel">GitHub</a></li>
