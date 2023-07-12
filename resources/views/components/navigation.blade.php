@@ -14,7 +14,6 @@
                 <li class="hidden md:block"><a href="{{ route('docs.index') }}" class="transition transform hover:underline underline-offset-4">{{ __('Documentation') }}</a></li>
                 <li class="hidden md:block"><a href="https://bootcamp.turbo-laravel.com" class="transition transform hover:underline underline-offset-4">{{ __('Bootcamp') }}</a></li>
                 <li class="hidden md:block"><a href="https://github.com/tonysm/turbo-laravel" class="transition transform hover:underline underline-offset-4">{{ __('GitHub') }}</a></li>
-                {{ $navLinks ?? '' }}
                 <li><div data-turbo-permanent id="algolia-search"></div></li>
                 <li class="md:hidden"><button data-action="click->dropdown#toggle"><x-icons.bars-3 /></button></li>
             </ul>

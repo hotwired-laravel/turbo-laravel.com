@@ -32,10 +32,6 @@
 
         <header @class(["py-8", "shadow-sm" => ! request()->routeIs('welcome')])>
             <x-navigation>
-                <x-slot:navLinks>
-                    @yield('navLinks', $navLinks ?? '')
-                </x-slot:navLinks>
-
                 <x-slot:mobileIndex>
                     @yield('mobileIndex', $mobileIndex ?? '')
                 </x-slot>
