@@ -2,10 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 use Facades\App\Documentation;
-use League\CommonMark\Node\Block\Document;
 
 if (! defined('DEFAULT_VERSION')) {
-    define('DEFAULT_VERSION', '2.x');
+    define('DEFAULT_VERSION', '1.x');
 }
 
 Route::get('/', function () {
