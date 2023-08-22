@@ -11,6 +11,9 @@ module.exports = {
     ],
     theme: {
         extend: {
+            colors: {
+                'turbo-brand': '#5cd8e5',
+            },
             fontFamily: {
                 sans: ['scandia-web', ...defaultTheme.fontFamily.sans],
                 mono: ['source-code-pro', ...defaultTheme.fontFamily.mono],
