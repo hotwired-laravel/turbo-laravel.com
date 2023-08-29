@@ -5,7 +5,7 @@
         <div class="space-y-12 min-h-[50vh] md:min-h-[65vh] flex flex-col justify-center">
             <h1 class="text-4xl sm:text-5xl text-center">
                 An elegant way to combine<br />
-                <span class="text-red-500 font-semibold">Hotwire and Laravel</span>
+                <span class="text-turbo-brand font-semibold">Hotwire</span> and <span class="text-red-500 font-semibold">Laravel</span>
             </h1>
 
             <p class="text-lg max-w-lg mx-auto text-center">
