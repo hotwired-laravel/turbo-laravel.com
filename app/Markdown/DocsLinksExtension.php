@@ -21,7 +21,7 @@ class DocsLinksExtension implements ExtensionInterface, NodeRendererInterface, C
     public function configureSchema(ConfigurationBuilderInterface $builder): void
     {
         $builder->addSchema('docs_links', Expect::structure([
-            'current_version' => Expect::string()->default(DEFAULT_VERSION),
+            'current_version' => Expect::string()->default(\DEFAULT_VERSION),
             'frame' => Expect::string()->default(''),
         ]));
     }
