@@ -1,8 +1,8 @@
 <?php
 
+use App\Documentation;
+use App\Guide;
 use Illuminate\Support\Facades\Route;
-use Facades\App\Documentation;
-use Facades\App\Guide;
 
 if (! defined('DEFAULT_VERSION')) {
     define('DEFAULT_VERSION', '1.x');
@@ -23,32 +23,32 @@ Route::get('change-version', function () {
     return redirect('/docs/' . $version . '/' . $page);
 })->name('change-version');
 
-Route::get('docs/{version}/{page?}', function (string $version, ?string $page = null) {
-    if (! Documentation::isVersion($version)) {
+Route::get('docs/{version}/{page?}', function (Documentation $docs, string $version, ?string $page = null) {
+    if (! $docs->isVersion($version)) {
         return redirect('/docs/' . DEFAULT_VERSION . '/'. $page, 301);
     }
 
-    if (! Documentation::pageExistsInVersion($version, $page)) {
+    if (! $docs->pageExistsInVersion($version, $page)) {
         return redirect('/docs/' . $version . '/installation', 301);
     }
 
-    [$index, $content] = Documentation::render($version, $page ?? 'installation');
+    [$index, $content] = $docs->render($version, $page ?? 'installation');
 
     return view('docs', [
         'page' => $page,
         'currentVersion' => $version,
-        'versions' => Documentation::getVersions(),
+        'versions' => $docs->getVersions(),
         'index' => $index,
         'content' => $content,
     ]);
 });
 
-Route::get('guides/{page?}', function (?string $page = null) {
-    if (! $page || ! Guide::pageExists($page)) {
+Route::get('guides/{page?}', function (Guide $guide, ?string $page = null) {
+    if (! $page || ! $guide->pageExists($page)) {
         return redirect('/guides/introduction');
     }
 
-    [$index, $content] = Guide::render($page);
+    [$index, $content] = $guide->render($page);
 
     return view('guides', [
         'page' => $page,
