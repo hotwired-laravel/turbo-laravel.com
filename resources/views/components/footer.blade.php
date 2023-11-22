@@ -7,7 +7,7 @@
 
         <ul class="flex items-center space-x-4">
             <li><a href="/docs">Documentation</a></li>
-            <li><a href="https://bootcamp.turbo-laravel.com">Bootcamp</a></li>
+            <li><a href="{{ route('guides.index') }}">Guides</a></li>
             <li><a href="https://github.com/tonysm/turbo-laravel">GitHub</a></li>
         </ul>
     </div>
