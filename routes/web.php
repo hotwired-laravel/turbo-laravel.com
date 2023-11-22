@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Facades\App\Documentation;
+use Facades\App\Guide;
 
 if (! defined('DEFAULT_VERSION')) {
     define('DEFAULT_VERSION', '1.x');
@@ -41,3 +42,17 @@ Route::get('docs/{version}/{page?}', function (string $version, ?string $page = 
         'content' => $content,
     ]);
 });
+
+Route::get('guides/{page?}', function (?string $page = null) {
+    if (! $page || ! Guide::pageExists($page)) {
+        return redirect('/guides/introduction');
+    }
+
+    [$index, $content] = Guide::render($page);
+
+    return view('guides', [
+        'page' => $page,
+        'index' => $index,
+        'content' => $content,
+    ]);
+})->name('guides.index');

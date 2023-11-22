@@ -12,7 +12,7 @@
             <!-- Right Side -->
             <ul class="flex items-center space-x-4 sm:space-x-8">
                 <li class="hidden md:block"><a href="{{ route('docs.index') }}" class="transition transform hover:underline underline-offset-4">{{ __('Documentation') }}</a></li>
-                <li class="hidden md:block"><a href="https://bootcamp.turbo-laravel.com" class="transition transform hover:underline underline-offset-4">{{ __('Bootcamp') }}</a></li>
+                <li class="hidden md:block"><a href="{{ route('guides.index') }}" class="transition transform hover:underline underline-offset-4">{{ __('Guides') }}</a></li>
                 <li class="hidden md:block"><a href="https://github.com/tonysm/turbo-laravel" class="transition transform hover:underline underline-offset-4">{{ __('GitHub') }}</a></li>
                 <li><div data-turbo-permanent id="algolia-search"></div></li>
                 <li class="md:hidden"><button data-action="click->dropdown#toggle"><x-icons.bars-3 /></button></li>
@@ -32,7 +32,7 @@
             >
                 <ul class="flex flex-col pt-5 mt-5 space-y-2 border-t border-gray-100">
                     <li><a href="{{ route('docs.index') }}">Documentation</a></li>
-                    <li><a href="https://bootcamp.turbo-laravel.com">Bootcamp</a></li>
+                    <li><a href="{{ route('guides.index') }}">Guides</a></li>
                     <li><a href="https://github.com/tonysm/turbo-laravel">GitHub</a></li>
                 </ul>
 
