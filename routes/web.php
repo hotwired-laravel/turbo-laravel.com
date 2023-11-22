@@ -8,6 +8,10 @@ if (! defined('DEFAULT_VERSION')) {
     define('DEFAULT_VERSION', '1.x');
 }
 
+Route::domain('bootcamp.turbo-laravel.com', function () {
+    Route::redirect('/', '/guides/introduction');
+});
+
 Route::get('/', function () {
     return view('welcome');
 })->name('welcome');
