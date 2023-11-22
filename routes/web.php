@@ -4,16 +4,12 @@ use App\Documentation;
 use App\Guide;
 use Illuminate\Support\Facades\Route;
 
-if (! defined('DEFAULT_VERSION')) {
-    define('DEFAULT_VERSION', '1.x');
-}
-
 Route::get('/', function () {
     return view('welcome');
 })->name('welcome');
 
 Route::get('docs/{page?}', function (?string $page = null) {
-    return redirect('/docs/' . DEFAULT_VERSION . '/' . ($page ?? 'installation'));
+    return redirect('/docs/' . Documentation::DEFAULT_VERSION . '/' . ($page ?? 'installation'));
 })->name('docs.index');
 
 Route::get('change-version', function () {
@@ -25,7 +21,7 @@ Route::get('change-version', function () {
 
 Route::get('docs/{version}/{page?}', function (Documentation $docs, string $version, ?string $page = null) {
     if (! $docs->isVersion($version)) {
-        return redirect('/docs/' . DEFAULT_VERSION . '/'. $page, 301);
+        return redirect('/docs/' . Documentation::DEFAULT_VERSION . '/'. $page, 301);
     }
 
     if (! $docs->pageExistsInVersion($version, $page)) {

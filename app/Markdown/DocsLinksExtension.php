@@ -2,6 +2,7 @@
 
 namespace App\Markdown;
 
+use App\Documentation;
 use League\CommonMark\Environment\EnvironmentBuilderInterface;
 use League\CommonMark\Extension\CommonMark\Node\Inline\Link;
 use League\CommonMark\Extension\ConfigurableExtensionInterface;
@@ -21,7 +22,7 @@ class DocsLinksExtension implements ExtensionInterface, NodeRendererInterface, C
     public function configureSchema(ConfigurationBuilderInterface $builder): void
     {
         $builder->addSchema('docs_links', Expect::structure([
-            'current_version' => Expect::string()->default(\DEFAULT_VERSION),
+            'current_version' => Expect::string()->default(Documentation::DEFAULT_VERSION),
             'frame' => Expect::string()->default(''),
         ]));
     }

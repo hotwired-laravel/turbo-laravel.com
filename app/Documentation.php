@@ -8,6 +8,8 @@ use SplFileInfo;
 
 class Documentation
 {
+    const DEFAULT_VERSION = '1.x';
+
     public function __construct(private Markdown $markdown)
     {
     }
