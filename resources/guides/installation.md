@@ -78,14 +78,14 @@ Once the application's Docker containers have been started, you can access the a
 
 Next, we'll give our application a head-start by installing [Turbo Breeze](https://github.com/hotwired-laravel/turbo-breeze), a minimal, simple imeplementation of all of Laravel's authentication features, including login, registration, password reset, email verification, and password confirmation. Once installed, you are welcome to customize the components to suit your needs.
 
-Turbo Breeze offers two stack options: `turbo`, which comes with Importmap Laravel and TailwindCSS Laravel installed for a Node-less setup, and a `turbo-vite` option, which relies on having Node and NPM. For this tutorial, we'll be using `turbo`.
+Turbo Breeze offers two stack options: `turbo`, which comes with [Importmap Laravel](https://github.com/tonysm/importmap-laravel) and [TailwindCSS Laravel](https://github.com/tonysm/tailwindcss-laravel) installed for a Node-less setup, and a `turbo-vite` option, which relies on having Node and NPM. For this tutorial, we'll be using `turbo`.
 
 Open a new terminal in your `turbo-chirper` project directory and install your chosen stack with the given commands:
 
 ```bash
-composer require hotwired-laravel/turbo-breeze --dev
+composer require hotwired-laravel/turbo-breeze:1.0.0-beta2 --dev
 
-artisan turbo-breeze:install turbo --dark
+php artisan turbo-breeze:install turbo --dark
 ```
 
 > **note**
