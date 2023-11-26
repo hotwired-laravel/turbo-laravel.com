@@ -42,8 +42,15 @@ Route::resource('chirps', ChirpController::class)
     ->middleware(['auth', 'verified']);
 // [tl! collapse:start]
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+
+    Route::get('/profile/password/edit', [ProfilePasswordController::class, 'edit'])->name('profile.password.edit');
+    Route::patch('/profile/password', [ProfilePasswordController::class, 'update'])->name('profile.password.update');
+
+    Route::get('/profile/delete', [ProfileController::class, 'delete'])->name('profile.delete');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
@@ -64,7 +71,7 @@ PUT/PATCH | `/chirps/{chirp}`      | update       | `chirps.update`
 
 Next, let's update our `chirps._chirp` Blade partial to have an edit form for existing Chirps.
 
-We're going to use the `<x-dropdown>` component that comes with Breeze, which we'll only display to the Chirp author. We'll also display an indication if a Chirp has been edited by comparing the Chirp's `created_at` date with its `updated_at` date:
+We're going to use the `<x-dropdown>` component that comes with Turbo Breeze, which we'll only display to the Chirp author. We'll also display an indication if a Chirp has been edited by comparing the Chirp's `created_at` date with its `updated_at` date:
 
 ```blade filename="resources/views/chirps/_chirp.blade.php"
 <div class="p-6 flex space-x-2">
@@ -75,9 +82,7 @@ We're going to use the `<x-dropdown>` component that comes with Breeze, which we
         <div class="flex justify-between items-center">
             <div>
                 <span class="text-gray-800">{{ $chirp->user->name }}</span>
-                <small class="ml-2 text-sm text-gray-600">
-                    <x-relative-time :date="$chirp->created_at" />
-                </small>
+                <small class="ml-2 text-sm text-gray-600"><x-relative-time :date="$chirp->created_at" /></small>
                 @unless ($chirp->created_at->eq($chirp->updated_at))<!-- [tl! add:start] -->
                 <small class="text-sm text-gray-600"> &middot; edited</small>
                 @endunless<!-- [tl! add:end] -->
@@ -94,9 +99,7 @@ We're going to use the `<x-dropdown>` component that comes with Breeze, which we
                 </x-slot>
 
                 <x-slot name="content">
-                    <a href="{{ route('chirps.edit', $chirp) }}" class="block w-full px-4 py-2 text-left text-sm leading-5 text-gray-700 hover:bg-gray-100 focus:bg-gray-100 transition duration-150 ease-in-out">
-                        Edit
-                    </a>
+                    <x-dropdown-link href="{{ route('chirps.edit', $chirp) }}">{{ __('Edit') }}</x-dropdown-link>
                 </x-slot>
             </x-dropdown>
             @endif<!-- [tl! add:end] -->
@@ -220,70 +223,48 @@ Now, we need to create our `chirps.edit` view:
 ```blade filename="resources/views/chirps/edit.blade.php"
 <x-app-layout :title="__('Edit Chirp')">
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            <a href="{{ route('chirps.index') }}" class="underline underline-offset-2 text-indigo-600">Chirps</a> <span class="text-gray-300">/</span> {{ __('Edit Chirp #:id', ['id' => $chirp->id]) }}
+        <h2 class="flex items-center space-x-1 font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+            <x-breadcrumbs :links="[route('chirps.index') => __('Chirps'), __('Edit Chirp')]" />
         </h2>
     </x-slot>
 
-    <div class="max-w-2xl mx-auto p-4 sm:p-6 lg:p-8">
-        @include('chirps._form', ['chirp' => $chirp])
+    <div class="py-12">
+        <div class="max-w-2xl mx-auto sm:px-6 lg:px-8 space-y-6">
+            <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
+                <div class="max-w-xl mx-auto">
+                    @include('chirps.partials.chirp-form', ['chirp' => $chirp])
+                </div>
+            </div>
+        </div>
     </div>
 </x-app-layout>
 ```
 
-Since this view would use the same form as the create one, we may extract the form to its own partial at `chirps._form` and make some changes to it so it works for both creating and editing Chirps:
+We're using the same `chirp-form` partial the create chirps view uses. However, in this case we're passing down a Chirp model to the form so it can pre-fill the message field. Since we're passing a Chirp model, we can make the form submit to the `chirps.update` endpoint instead of the default `chirps.store` one when no Chirp is passed. Let's make the changes to the `chirps.partials.chirp-form` partial, replace the existing form with this one:
 
-```blade filename="resources/views/chirps/_form.blade.php"
+```blade filename="resources/views/chirps/partials/chirp-form.blade.php"
 <form action="{{ ($chirp ?? false) ? route('chirps.update', $chirp) : route('chirps.store') }}" method="POST">
+    @csrf
     @if ($chirp ?? false)
         @method('PUT')
     @endif
 
-    <textarea
-        name="message"
-        placeholder="What's on your mind?"
-        class="block w-full border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm"
-    >{{ $chirp->message ?? '' }}</textarea>
-    <x-input-error :messages="$errors->get('message')" class="mt-2" />
+    <div>
+        <x-input-label for="message" :value="__('Message')" class="sr-only" />
+        <x-textarea-input id="message" name="message" autofocus placeholder="{{ __('What\'s on your mind?') }}" class="block w-full" :value="$chirp?->message ?? ''" />
+        <x-input-error :messages="$errors->get('message')" class="mt-2" />
+    </div>
 
-    <div class="flex items-center justify-start space-x-2">
-        <x-primary-button class="mt-4">
+    <div class="mt-6">
+        <x-primary-button>
             {{ __('Chirp') }}
         </x-primary-button>
 
         @if ($chirp ?? false)
-        <a href="{{ route('chirps.index') }}" class="mt-4">Cancel</a>
+        <a href="{{ route('chirps.index') }}" class="mt-4">{{ __('Cancel') }}</a>
         @endif
     </div>
 </form>
-```
-
-Now, we can update the `chirps.create` view to also use the same form:
-
-```blade filename="resources/views/chirps/create.blade.php"
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            <a href="{{ route('chirps.index') }}" class="underline underline-offset-2 text-indigo-600">Chirps</a> <span class="text-gray-300">/</span> {{ __('New Chirp') }}
-        </h2>
-    </x-slot>
-
-    <div class="max-w-2xl mx-auto p-4 sm:p-6 lg:p-8">
-        <form action="{{ route('chirps.store') }}" method="POST"><!-- [tl! remove:start] -->
-            <textarea
-                name="message"
-                placeholder="What's on your mind?"
-                class="block w-full border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm"
-            ></textarea>
-            <x-input-error :messages="$errors->get('message')" class="mt-2" />
-
-            <x-primary-button class="mt-4">
-                {{ __('Chirp') }}
-            </x-primary-button>
-        </form><!-- [tl! remove:end] -->
-        @include('chirps._form')<!-- [tl! add] -->
-    </div>
-</x-app-layout>
 ```
 
 ## Authorization
@@ -501,9 +482,7 @@ class ChirpController extends Controller
 
         $chirp->update($validated);
 
-        return redirect()
-            ->route('chirps.index')
-            ->with('status', __('Chirp updated.'));// [tl! add:end]
+        return redirect()->route('chirps.index')->with('notice', __('Chirp updated.'));// [tl! add:end]
     }
     // [tl! collapse:start]
     /**
