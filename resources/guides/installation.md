@@ -117,7 +117,7 @@ There are a couple differences between Turbo Breeze and Larave Breeze. In Larave
 
 ![Profile Menu](/images/profile-menu.png)
 
-In Laravel Breeze, all the profile forms are rendered in the same page. In Turbo Breeze, each one has its own dedicated page. That's not a requirement for Hotwired apps, but it works best in a mobile context, we'll see more about that later in this guide.
+In Laravel Breeze, all the profile forms are rendered in the same page. In Turbo Breeze, each one has its own dedicated page. That's not a requirement for Hotwired apps, but it works best in a mobile context. We'll see more about that later in this bootcamp.
 
 Now we're ready for our first feature!
 
