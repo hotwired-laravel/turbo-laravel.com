@@ -1,12 +1,12 @@
 # Introduction
 
-Learn how to make web apps using Laravel and Hotwire. When we finish the web app, we'll dig into the Turbo Native side of Hotwire so we can see it to bridge the Web and Native Worlds!
+Lean how to make [Hotwired](https://hotwired.dev/) web apps using Laravel. And when we're finished with the web app, we'll dive into the Turbo Native side of Hotwire so we can see how it bridges the web and native worlds!
 
-To explore the many sides of Hotwire, we're going to build a micro-blogging platform called Turbo Chirper. Many parts of this tutorial were inspired by the [official Laravel Bootcamp](https://bootcamp.laravel.com/) and adapted to work better in a Hotwired app.
+To explore the many sides of Hotwire, we'll build a micro-blogging platform called Turbo Chirper. Many parts of this tutorial were inspired by the [official Laravel Bootcamp](https://bootcamp.laravel.com/) adapted to work better in a Hotwired app.
 
-We're going to use [Importmap Laravel](https://github.com/tonysm/importmap-laravel) and [TailwindCSS Laravel](https://github.com/tonysm/tailwindcss-laravel) instead of Laravel's default Vite setup. Vite would work, but I'm taking this opportunity to demonstrate an alternative front-end setup. If you're already familiar with Vite, feel free to skip the installation parts about Importmap Laravel and TailwindCSS Laravel.
+We'll use [Importmap Laravel](https://github.com/tonysm/importmap-laravel) and [TailwindCSS Laravel](https://github.com/tonysm/tailwindcss-laravel) instead of Laravel's default Vite setup. Vite would work, but I'm taking this opportunity to demonstrate an alternative front-end setup. If you're already familiar with Vite, feel free to choose the `turbo-vite` stack when setting up the application in the [installation guide](/guides/installation).
 
-On the JavaScript side, we're going to use [Stimulus.js](https://stimulus.hotwired.dev/). Laravel Breeze chips with a few tiny [Alpine.js](https://alpinejs.dev/) components, which we'll convert to Stimulus. Alpine would work for most things. The first version of this tutorial used Alpine, for instance. But I decided to convert everything to Stimulus once I got to the Turbo Native integration side. I liked it better with Stimulus in this context. Again, if you're already familiar with Alpine, feel free keep using it and adapt the examples as you see fit.
+On the JavaScript side, we'll use [Stimulus.js](https://stimulus.hotwired.dev/). [Turbo Breeze](https://github.com/hotwired-laravel/turbo-breeze) - the starter kit we'll use - comes with all the same components in Laravel Breeze, reimplemented in Stimulus, so you won't miss out on anything. Also, most of the time, we're able to quickly convert Alpine components into Stimulus controllers.
 
 Let's get started!
 
