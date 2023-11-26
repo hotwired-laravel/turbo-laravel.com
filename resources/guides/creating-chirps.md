@@ -49,7 +49,8 @@ We are also going to place these routes behind two [middlewares](https://laravel
 <?php
 
 use App\Http\Controllers\ChirpController; // [tl! add]
-use Illuminate\Foundation\Application;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProfilePasswordController;
 use Illuminate\Support\Facades\Route;
 // [tl! collapse:start]
 /*
@@ -58,8 +59,8 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 |
 | Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
+| routes are loaded by the RouteServiceProvider and all of them will
+| be assigned to the "web" middleware group. Make something great!
 |
 */
 
@@ -74,6 +75,21 @@ Route::get('/dashboard', function () {
 Route::resource('chirps', ChirpController::class) // [tl! add:start]
     ->only(['index', 'create', 'store'])
     ->middleware(['auth', 'verified']); // [tl! add:end]
+
+Route::middleware('auth')->group(function () {
+    // [tl! collapse:start]
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+
+    Route::get('/profile/password/edit', [ProfilePasswordController::class, 'edit'])->name('profile.password.edit');
+    Route::patch('/profile/password', [ProfilePasswordController::class, 'update'])->name('profile.password.update');
+
+    Route::get('/profile/delete', [ProfileController::class, 'delete'])->name('profile.delete');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    // [tl! collapse:end]
+});
 
 require __DIR__.'/auth.php';
 ```
@@ -286,20 +302,32 @@ We can then create our `chirps.index` view with a link to our form for creating 
 ```blade filename=resources/views/chirps/index.blade.php
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Chirps') }}
+        <h2 class="flex items-center space-x-1 font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+            <x-breadcrumbs :links="[__('Chirps')]" />
         </h2>
     </x-slot>
 
-    <div class="max-w-2xl mx-auto p-4 sm:p-6 lg:p-8">
-        <div class="relative flex items-center justify-center py-10 px-4 rounded-lg border border-dotted border-gray-300">
-            <a class="text-gray-700" href="{{ route('chirps.create') }}">
-                Add a new Chirp
-                <span class="absolute inset-0"></span>
-            </a>
+    <div class="py-12">
+        <div class="max-w-2xl mx-auto sm:px-6 lg:px-8 space-y-6">
+            <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
+                <div class="max-w-xl mx-auto">
+                    @include('chirps.partials.new-chirp-trigger')
+                </div>
+            </div>
         </div>
     </div>
 </x-app-layout>
+```
+
+This view is including a partial called `new-chirp-trigger`, so create the partial with the following content:
+
+```blade filename=resources/views/chirps/partials/new-chirp-trigger.blade.php
+<div class="relative flex items-center justify-center py-10 px-4 rounded-lg border border-dotted border-gray-300 dark:border-gray-600">
+    <a class="text-gray-700 dark:text-gray-500" href="{{ route('chirps.create') }}">
+        {{ __('New Chirp') }}
+        <span class="absolute inset-0"></span>
+    </a>
+</div>
 ```
 
 Then, let's create our `chirps.create` page view with the Chirps form:
@@ -307,29 +335,52 @@ Then, let's create our `chirps.create` page view with the Chirps form:
 ```blade filename=resources/views/chirps/create.blade.php
 <x-app-layout :title="__('Create Chirp')">
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            <a href="{{ route('chirps.index') }}" class="underline underline-offset-2 text-indigo-600">Chirps</a> <span class="text-gray-300">/</span> {{ __('New Chirp') }}
+        <h2 class="flex items-center space-x-1 font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+            <x-breadcrumbs :links="[route('chirps.index') => __('Chirps'), __('New Chirp')]" />
         </h2>
     </x-slot>
 
-    <div class="max-w-2xl mx-auto p-4 sm:p-6 lg:p-8">
-        <form action="{{ route('chirps.store') }}" method="POST">
-            <textarea
-                name="message"
-                placeholder="What's on your mind?"
-                class="block w-full border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm"
-            ></textarea>
-            <x-input-error :messages="$errors->get('message')" class="mt-2" />
-
-            <x-primary-button class="mt-4">
-                {{ __('Chirp') }}
-            </x-primary-button>
-        </form>
+    <div class="py-12">
+        <div class="max-w-2xl mx-auto sm:px-6 lg:px-8 space-y-6">
+            <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
+                <div class="max-w-xl mx-auto">
+                    @include('chirps.partials.chirp-form')
+                </div>
+            </div>
+        </div>
     </div>
 </x-app-layout>
 ```
 
-Since we're passing a `title` prop to the layout component, we need to update the `AppLayout.php` PHP class:
+Again, this view is including a `chirp-form` partial. Create that file with the following content:
+
+```blade filename=resources/views/chirps/partials/chirp-form.blade.php
+<form action="{{ route('chirps.store') }}" method="POST">
+    @csrf
+
+    <div>
+        <x-input-label for="message" :value="__('Message')" class="sr-only" />
+        <x-textarea-input id="message" name="message" placeholder="{{ __('What\'s on your mind?') }}" class="block w-full" />
+        <x-input-error :messages="$errors->get('message')" class="mt-2" />
+    </div>
+
+    <div class="mt-6">
+        <x-primary-button>
+            {{ __('Chirp') }}
+        </x-primary-button>
+    </div>
+</form>
+```
+
+This partial is making use a Blade component that doesn't exist yet called `x-textarea-input`, let's create it:
+
+```blade filename=resources/views/components/textarea-input.blade.php
+@props(['disabled' => false, 'value' => ''])
+
+<textarea {{ $disabled ? 'disabled' : '' }} {!! $attributes->merge(['class' => 'border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm']) !!}>{{ $value }}</textarea>
+```
+
+Also, the `chirps.create` view is passing a `title` prop to the `x-app-layout` component, but the component is not expecting that yet. We need to update the `AppLayout.php` PHP class:
 
 ```php filename="app/Components/AppLayout.php"
 <?php
@@ -337,6 +388,7 @@ Since we're passing a `title` prop to the layout component, we need to update th
 namespace App\View\Components;
 
 use Illuminate\View\Component;
+use Illuminate\View\View;
 
 class AppLayout extends Component
 {
@@ -346,10 +398,8 @@ class AppLayout extends Component
 
     /**
      * Get the view / contents that represents the component.
-     *
-     * @return \Illuminate\View\View
      */
-    public function render()
+    public function render(): View
     {
         return view('layouts.app');
     }
@@ -370,23 +420,29 @@ Now, update the `layouts/app.blade.php` file to make use of the new title prop:
         <title>{{ $title ?? config('app.name', 'Laravel') }}</title> <!-- [tl! remove:-1,1 add] -->
 
         <!-- Fonts -->
-        <link rel="stylesheet" href="https://fonts.bunny.net/css2?family=Nunito:wght@400;600;700&display=swap">
+        <link rel="preconnect" href="https://fonts.bunny.net">
+        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+
+        <!-- Styles -->
+        <link rel="stylesheet" href="{{ tailwindcss('css/app.css') }}">
 
         <!-- Scripts -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        <x-importmap-tags />
+        <link rel="stylesheet" href="{{ tailwindcss('css/app.css') }}" />
     </head>
     <body class="font-sans antialiased">
         <!-- [tl! collapse:start] -->
-        <div class="min-h-screen bg-gray-100">
+        <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
             @include('layouts.navigation')
-            @include('layouts.notifications')
 
             <!-- Page Heading -->
-            <header class="bg-white shadow">
-                <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                    {{ $header }}
-                </div>
-            </header>
+            @if (isset($header))
+                <header class="bg-white dark:bg-gray-800 shadow">
+                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                        {{ $header }}
+                    </div>
+                </header>
+            @endif
 
             <!-- Page Content -->
             <main>
@@ -413,30 +469,70 @@ Let's take a moment to add a link to the navigation menu provided by Breeze.
 Update the `navigation` Blade component provided by Breeze to add a menu item for desktop screens:
 
 ```blade filename=resources/views/components/navigation.blade.php
-<!-- Navigation Links -->
-<div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-        {{ __('Dashboard') }}
-    </x-nav-link>
+<nav
+    data-controller="responsive-nav"
+    data-action="
+        turbo:before-cache@window->responsive-nav#close
+        click@window->responsive-nav#closeWhenClickedOutside
+    "
+    class="group bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700"
+>
+    <!-- Primary Navigation Menu -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16">
+            <div class="flex">
+                <!-- Logo -->
+                <div class="shrink-0 flex items-center">
+                    <a href="{{ route('dashboard') }}">
+                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800 dark:text-gray-200" />
+                    </a>
+                </div>
 
-    <x-nav-link :href="route('chirps.index')" :active="request()->routeIs('chirps.*')">
-        {{ __('Chirps') }}
-    </x-nav-link> <!-- [tl! add:-2,3] -->
-</div>
-```
+                <!-- Navigation Links -->
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                        {{ __('Dashboard') }}
+                    </x-nav-link>
 
-Don't forget the responsive menu used for devices with small screens:
+                    <x-nav-link :href="route('chirps.index')" :active="request()->routeIs('chirps.*')">
+                        {{ __('Chirps') }}
+                    </x-nav-link> <!-- [tl! add:-2,3] -->
+                </div>
+            </div>
+            <!-- [tl! collapse:start] -->
+            <div class="flex items-center space-x-2">
+                <!-- Settings Dropdown -->
+                <a href="{{ route('profile.index') }}" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
+                    <div>{{ Auth::user()->name }}</div>
+                </a>
 
-```blade filename=resources/views/components/navigation.blade.php
-<div class="pt-2 pb-3 space-y-1">
-    <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-        {{ __('Dashboard') }}
-    </x-responsive-nav-link>
+                <!-- Hamburger -->
+                <div class="-me-2 flex items-center sm:hidden">
+                    <button data-action="responsive-nav#toggle" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-900 focus:text-gray-500 dark:focus:text-gray-400 transition duration-150 ease-in-out">
+                        <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                            <path class="inline-flex group-data-[responsive-nav-open-value=true]:hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                            <path class="hidden group-data-[responsive-nav-open-value=true]:inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <!-- [tl! collapse:end] -->
+        </div>
+    </div>
 
-    <x-responsive-nav-link :href="route('chirps.index')" :active="request()->routeIs('chirps.*')">
-        {{ __('Chirps') }}
-    </x-responsive-nav-link> <!-- [tl! add:-2,3] -->
-</div>
+    <!-- Responsive Navigation Menu -->
+    <div class="hidden group-data-[responsive-nav-open-value=true]:block sm:group-data-[responsive-nav-open-value=true]:hidden">
+        <div class="pt-2 pb-3 space-y-1">
+            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                {{ __('Dashboard') }}
+            </x-responsive-nav-link>
+
+            <x-responsive-nav-link :href="route('chirps.index')" :active="request()->routeIs('chirps.*')">
+                {{ __('Chirps') }}
+            </x-responsive-nav-link> <!-- [tl! add:-2,3] -->
+        </div>
+    </div>
+</nav>
 ```
 
 We should see the Chirps link on the page nav now:
@@ -716,9 +812,9 @@ App\Model\Chirp::all();
        App\Models\Chirp {#4636
          id: 1,
          user_id: 1,
-         message: "Testing this out!",
-         created_at: "2022-09-27 02:41:03",
-         updated_at: "2022-09-27 02:41:03",
+         message: "Hello World!",
+         created_at: "2023-11-26 19:53:33",
+         updated_at: "2023-11-26 19:53:33",
        },
      ],
    }
@@ -732,7 +828,7 @@ Before we move on from creating Chirps, let's add the ability to show flash mess
 
 Since we're redirecting the user to another page and redirects happens in the browser (client side), we'd need a way to store messages across requests. Laravel has a feature called [Flash Data](https://laravel.com/docs/session#flash-data) which does exactly that! With that, we can safely store a flash message in the user's session, just so we can retrive it from there after the redirect happens in the user's browser.
 
-Let's update our `store` action in the `ChirpController` to also return a flash message named `status` in the redirect:
+Let's update our `store` action in the `ChirpController` to also return a flash message named `notice` in the redirect:
 
 ```php filename="app/Http/Controllers/ChirpController.php"
 <?php
@@ -779,10 +875,8 @@ class ChirpController extends Controller
 
         $request->user()->chirps()->create($validated);
 
-        return redirect()
-            ->route('chirps.index');
-            ->route('chirps.index')
-            ->with('status', __('Chirp created.')); // [tl! remove:-2,1 add:-1,2]
+        return redirect()->route('chirps.index');
+        return redirect()->route('chirps.index')->with('notice', __('Chirp created.'));  // [tl! remove:-1,1 add]
     }
     // [tl! collapse:start]
     /**
@@ -879,8 +973,8 @@ Next, let's create the `layouts.notifications` wrapper partial:
 
 ```blade filename="resources/views/layouts/notifications.blade.php"
 <div id="notifications" class="fixed top-10 left-0 right-0 flex flex-col items-center justify-center space-y-2 z-10 opacity-80">
-    @if (session()->has('status'))
-        @include('layouts.notification', ['message' => session('status')])
+    @if (session()->has('notice'))
+        @include('layouts.notification', ['message' => session('notice')])
     @endif
 </div>
 ```
@@ -888,10 +982,16 @@ Next, let's create the `layouts.notifications` wrapper partial:
 So, each notification will render with the `layouts.notification` (singular) partial and will be added to the wrapper partial. Let's add the indivitual notification partial:
 
 ```blade filename="resources/views/layouts/notification.blade.php"
-<div class="py-1 px-4 leading-7 text-center text-white rounded-full bg-gray-900 transition-all animate-appear-then-fade-out" data-controller="flash" data-action="animationend->flash#remove">
+<div data-turbo-temporary data-controller="flash" data-action="animationend->flash#remove" class="py-1 px-4 leading-7 text-center text-white rounded-full bg-gray-900 transition-all animate-appear-then-fade-out">
     {{ $message }}
 </div>
 ```
+
+There are a few attributes I'd like to briefly discuss here:
+
+- The `data-turbo-temporary` tells Turbo to remove this element from the [Page Cache](https://turbo.hotwired.dev/handbook/building#preparing-the-page-to-be-cached)
+- The `data-controller="flash"` is how we bind Stimulus controllers to an element. In this case, we're binding the `flash` controller, which is a controller that ships with Turbo Breeze and may be found at `resources/js/controllers/flash_controller.js`
+- The `data-action="animationend->flash#remove"` is how we add event listeners and invoke Stimulus controller actions when those events happens. In this case, we're listening to a CSS3 event called `animationend` which is fired whenever a CSS animation ends. The animation is the one provided by the `animation-appear-then-fade-out` CSS class, it also comes from Turbo Breeze.
 
 Now, build our TailwindCSS styles:
 
@@ -899,7 +999,7 @@ Now, build our TailwindCSS styles:
 php artisan tailwindcss:build
 ```
 
-We're making use of our existing `flash` Stimulus controller and also the `animate-appear-then-fade-out` animation CSS class.
+If you create another Chirp now, you should see a nice notification message at the top:
 
 ![Flash Messages](/images/creating-chirps-flash-messages.png)
 

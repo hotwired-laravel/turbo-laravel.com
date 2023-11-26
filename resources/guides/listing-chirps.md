@@ -12,12 +12,12 @@ Let's update the `index` action our `ChirpController` to pass Chirps from every 
 
 ```php filename="app/Http/Controllers/ChirpController.php"
 <?php
-// [tl! collapse:start]
+
 namespace App\Http\Controllers;
 
-use App\Models\Chirp;
+use App\Models\Chirp; // [tl! add]
 use Illuminate\Http\Request;
-// [tl! collapse:end]
+
 class ChirpController extends Controller
 {
     /**
@@ -144,50 +144,54 @@ class Chirp extends Model
 
 This relationship is the inverse of the "has many" relationship we created earlier on the `User` model.
 
-## Chirp partial
+## Displaying The Chirps
 
-Next, let's create a `chirps._chirp` Blade partial to display Chirp. This component will be responsible for displaying an individual Chirp:
-
-```blade filename=resources/views/chirps/_chirp.blade.php
-<div class="p-6 flex space-x-2">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600 -scale-x-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-    </svg>
-    <div class="flex-1">
-        <div class="flex justify-between items-center">
-            <div>
-                <span class="text-gray-800">{{ $chirp->user->name }}</span>
-                <small class="ml-2 text-sm text-gray-600">{{ $chirp->created_at->diffForHumans() }}</small>
-            </div>
-        </div>
-        <p class="mt-4 text-lg text-gray-900">{{ $chirp->message }}</p>
-    </div>
-</div>
-```
-
-Finally, we will update our `chirps.index` page Blade view to iterate over the `chirps` variable we're passing down from the `ChirpController` and render the Chirps below our form using our new partial:
+Next, update the `chirps.index` view so we can list all Chirps:
 
 ```blade filename=resources/views/chirps/index.blade.php
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Chirps') }}
+        <h2 class="flex items-center space-x-1 font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+            <x-breadcrumbs :links="[__('Chirps')]" />
         </h2>
     </x-slot>
 
-    <div class="max-w-2xl mx-auto p-4 sm:p-6 lg:p-8">
-        <div class="relative flex items-center justify-center py-10 px-4 rounded-lg border border-dotted border-gray-300">
-            <a class="text-gray-700" href="{{ route('chirps.create') }}">
-                Add a new Chirp
-                <span class="absolute inset-0"></span>
-            </a>
-        </div>
+    <div class="py-12">
+        <div class="max-w-2xl mx-auto sm:px-6 lg:px-8 space-y-6">
+            <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
+                <div class="max-w-xl mx-auto">
+                    @include('chirps.partials.new-chirp-trigger')
 
-        <div class="mt-6 bg-white shadow-sm rounded-lg divide-y"><!-- [tl! add:start] -->
-            @each('chirps._chirp', $chirps, 'chirp')
-        </div><!-- [tl! add:end] -->
+                    <div class="mt-6 bg-white shadow-sm rounded-lg divide-y dark:bg-gray-700 dark:divide-gray-500">
+                        @each('chirps._chirp', $chirps, 'chirp')
+                    </div> <!-- [tl! add:-2,3]-->
+                </div>
+            </div>
+        </div>
     </div>
 </x-app-layout>
+```
+
+Finally, let's create a `chirps._chirp` Blade partial to display Chirp. This component will be responsible for displaying an individual Chirp:
+
+```blade filename=resources/views/chirps/_chirp.blade.php
+<div class="p-6 flex space-x-2">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600 dark:text-gray-400 -scale-x-100" fill="none" viewBox="0 0 24 24"
+        stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round"
+            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+    </svg>
+
+    <div class="flex-1">
+        <div class="flex justify-between items-center">
+            <div>
+                <span class="text-gray-800 dark:text-gray-200">{{ $chirp->user->name }}</span>
+                <small class="ml-2 text-sm text-gray-600 dark:text-gray-400">{{ $chirp->created_at->diffForHumans() }}</small>
+            </div>
+        </div>
+        <p class="mt-4 text-lg text-gray-900 dark:text-gray-200">{{ $chirp->message }}</p>
+    </div>
+</div>
 ```
 
 Now take a look in your browser to see the message you Chirped earlier!
@@ -234,9 +238,7 @@ Then we can use this library in our `chirps._chirp` Blade partial to display rel
             <div>
                 <span class="text-gray-800">{{ $chirp->user->name }}</span>
                 <small class="ml-2 text-sm text-gray-600">{{ $chirp->created_at->diffForHumans() }}</small>
-                <small class="ml-2 text-sm text-gray-600"><!-- [tl! remove:-1,1 add:start] -->
-                    <x-relative-time :date="$chirp->created_at" />
-                </small><!-- [tl! add:end] -->
+                <small class="ml-2 text-sm text-gray-600 dark:text-gray-400"><x-relative-time :date="$chirp->created_at" /></small><!-- [tl! remove:-1,1 add] -->
             </div>
         </div>
         <p class="mt-4 text-lg text-gray-900">{{ $chirp->message }}</p>
