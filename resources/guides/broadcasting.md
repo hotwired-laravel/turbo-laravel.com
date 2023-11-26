@@ -97,77 +97,10 @@ That's it for setting up Soketi locally.
 
 ### Installing via Docker
 
-When using Laravel Sail, we can run Soketi as a Docker Compose service. For that, update your `docker-compose.yml` file to add it:
+When using Laravel Sail, we can setup a Soketi service by running `php artisan sail:add soketi`:
 
-```yaml filename="docker-compose.yml"
-# For more information: https://laravel.com/docs/sail
-version: '3'
-services:
-# [tl! collapse:start]
-    laravel.test:
-        build:
-            context: ./vendor/laravel/sail/runtimes/8.1
-            dockerfile: Dockerfile
-            args:
-                WWWGROUP: '${WWWGROUP}'
-        image: sail-8.1/app
-        extra_hosts:
-            - 'host.docker.internal:host-gateway'
-        ports:
-            - '${APP_PORT:-80}:80'
-        environment:
-            WWWUSER: '${WWWUSER}'
-            LARAVEL_SAIL: 1
-            XDEBUG_MODE: '${SAIL_XDEBUG_MODE:-off}'
-            XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}'
-        volumes:
-            - '.:/var/www/html'
-        networks:
-            - sail
-        depends_on:
-            - mysql
-# [tl! collapse:end add:1,13]
-    websockets.test:
-        image: 'quay.io/soketi/soketi:latest-16-alpine'
-        environment:
-            SOKETI_DEBUG: '${SOKETI_DEBUG:-1}'
-            SOKETI_METRICS_SERVER_PORT: '9601'
-            SOKETI_DEFAULT_APP_ID: '${PUSHER_APP_ID}'
-            SOKETI_DEFAULT_APP_KEY: '${PUSHER_APP_KEY}'
-            SOKETI_DEFAULT_APP_SECRET: '${PUSHER_APP_SECRET}'
-        ports:
-            - '${PUSHER_FRONTEND_PORT:-6001}:6001'
-            - '${PUSHER_METRICS_PORT:-9601}:9601'
-        networks:
-            - sail
-# [tl! collapse:start]
-    mysql:
-        image: 'mysql/mysql-server:8.0'
-        ports:
-            - '${FORWARD_DB_PORT:-3306}:3306'
-        environment:
-            MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
-            MYSQL_ROOT_HOST: "%"
-            MYSQL_DATABASE: '${DB_DATABASE}'
-            MYSQL_USER: '${DB_USERNAME}'
-            MYSQL_PASSWORD: '${DB_PASSWORD}'
-            MYSQL_ALLOW_EMPTY_PASSWORD: 1
-        volumes:
-            - 'sail-mysql:/var/lib/mysql'
-            - './vendor/laravel/sail/database/mysql/create-testing-database.sh:/docker-entrypoint-initdb.d/10-create-testing-database.sh'
-        networks:
-            - sail
-        healthcheck:
-            test: ["CMD", "mysqladmin", "ping", "-p${DB_PASSWORD}"]
-            retries: 3
-            timeout: 5s
-networks:
-    sail:
-        driver: bridge
-volumes:
-    sail-mysql:
-        driver: local
-# [tl! collapse:end]
+```bash
+php artisan sail:add soketi
 ```
 
 Before booting the new service, make sure your `.env` file looks like this:
@@ -219,10 +152,10 @@ AWS_DEFAULT_REGION=us-east-1
 AWS_BUCKET=
 AWS_USE_PATH_STYLE_ENDPOINT=false
 # [tl! collapse:end]
-PUSHER_APP_ID="app-id"
-PUSHER_APP_KEY="app-key"
-PUSHER_APP_SECRET="app-secret"
-PUSHER_HOST="websockets.test"
+PUSHER_APP_ID=app-id
+PUSHER_APP_KEY=app-key
+PUSHER_APP_SECRET=app-secret
+PUSHER_HOST=soketi
 PUSHER_PORT=6001
 PUSHER_SCHEME=http
 PUSHER_APP_CLUSTER=mt1
@@ -231,7 +164,7 @@ PUSHER_FRONTEND_HOST="localhost"
 PUSHER_FRONTEND_CLUSTER="${PUSHER_APP_CLUSTER}"
 ```
 
-Since containers run in isolation, we'll need two different hosts. Our backend will connect using the Docker Compose service name as the host, since Docker Compose will ensure both containers are running in the same network. That's why we're setting `PUSHER_HOST` to `websockets.test`.
+Since containers run in isolation, we'll need two different hosts. Our backend will connect using the Docker Compose service name as the host, since Docker Compose will ensure both containers are running in the same network. That's why we're setting `PUSHER_HOST` to `soketi`.
 
 However, our browser also needs to connect to the Soketi service. We're binding the Soketi container to our local port `6001`, so our browser can connect o `localhost:6001`. That's why we're setting `PUSHER_FRONTEND_HOST` to `localhost`.
 
@@ -656,7 +589,7 @@ Note that all our meta tags are exposed using the `current-pusher-*` prefix. Tha
 Before we set up Laravel Echo, let's install the JS dependencies:
 
 ```bash
-php artisan importmap:pin laravel-echo pusher-js
+php artisan importmap:pin laravel-echo pusher-js current.js
 ```
 
 Now, let's configure Laravel Echo. Uncomment the Laravel Echo settings in our `bootstrap.js`:
@@ -710,51 +643,25 @@ We could reach for them individually using something like:
 document.head.querySelector('meta[name=current-pusher-key]').content
 ```
 
-But we can actually use a trick that the 37signals folks are using on Hey. We can define a JS Proxy that will give us an object interface we can use to read meta data from our HTML document.
+But instead we're gonna use [current.js](https://www.npmjs.com/package/current.js), which is inpired by what the 37signals folks are using on Hey. This lib defines a JavaScript Proxy object that searches for the accessed properties in the HTML document's meta tags.
 
-First, let's create a new lib called `current.js` that will look like this:
+For instance, if we had the following meta tags:
 
-```js filename="resources/js/libs/current.js"
-// On-demand JavaScript objects from "current" HTML <meta> elements. Example:
-//
-// <meta name="current-identity-id" content="123">
-// <meta name="current-identity-time-zone-name" content="Central Time (US & Canada)">
-//
-// >> current.identity
-// => { id: "123", timeZoneName: "Central Time (US & Canada)" }
-//
-// >> current.foo
-// => {}
-export const current = new Proxy({}, {
-  get(target, propertyName) {
-    const result = {}
-    const prefix = `current-${propertyName}-`
-    for (const { name, content } of document.head.querySelectorAll(`meta[name^=${prefix}]`)) {
-      const key = camelize(name.slice(prefix.length))
-      result[key] = content
-    }
-    return result
-  }
-})
-
-function camelize(string) {
-  return string.replace(/(?:[_-])([a-z0-9])/g, (_, char) => char.toUpperCase())
-}
+```html
+<meta name="current-identity-id" content="123">
+<meta name="current-identity-time-zone-name" content="Central Time (US & Canada)">
 ```
 
-This snippet was taken from the Hey frontend source code, which is fully available to anyone to learn from in the page sources. Based on the comments, we can see how we can use it. In our case, we can access all of our `current-pusher-*` configs as an object by reaching for `current.pusher`, which would give us an object like so:
+We could reach for it from JavaScript using `current.js` like so:
 
 ```js
-{
-    key: "app-key",
-    cluster: "mt1",
-    wsHost: "localhost",
-    wsPort: 6001,
-    forceTLS: "false",
-}
+import { Current } from "current.js"
+
+Current.identity
+// => { id: "123", timeZoneName: "Central Time (US & Canada)" }
 ```
 
-Now, we can import that current object in our `bootstrap.js` file and replace all the `import.meta.env.*` calls with the following:
+Let's update our bootstrap.js to make use of `current.js` instead of relying on build-time keys using `import.meta.env.*`:
 
 ```js filename="resources/js/bootstrap.js"
 // [tl! collapse:start]
@@ -772,8 +679,8 @@ window.axios = axios;
 
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 // [tl! collapse:end add:1,2]
-import { current } from 'libs/current';
-window.current = current;
+import { Current } from 'current.js';
+window.Current = Current;
 // [tl! collapse:start]
 /**
  * Echo exposes an expressive API for subscribing to channels and listening
@@ -794,12 +701,12 @@ window.Echo = new Echo({
     wsPort: import.meta.env.VITE_PUSHER_PORT ?? 80,
     wssPort: import.meta.env.VITE_PUSHER_PORT ?? 443,
     forceTLS: (import.meta.env.VITE_PUSHER_SCHEME ?? 'https') === 'https',
-    key: current.pusher.key, // [tl! add:0,6]
-    cluster: current.pusher.cluster,
-    wsHost: current.pusher.wsHost,
-    wsPort: current.pusher.wsPort ?? 80,
-    wssPort: current.pusher.wssPort ?? 443,
-    forceTLS: (current.pusher.forceTLS ?? 'false') == true,
+    key: Current.pusher.key, // [tl! add:0,6]
+    cluster: Current.pusher.cluster,
+    wsHost: Current.pusher.wsHost,
+    wsPort: Current.pusher.wsPort ?? 80,
+    wssPort: Current.pusher.wssPort ?? 443,
+    forceTLS: (Current.pusher.forceTLS ?? 'false') == true,
     enabledTransports: ['ws', 'wss'],
 });
 ```
@@ -841,26 +748,27 @@ Now, let's update the `chirps/index.blade.php` to add the `x-turbo-stream-from` 
 ```blade filename="resources/views/chirps/index.blade.php"
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Chirps') }}
+        <h2 class="flex items-center space-x-1 font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+            <x-breadcrumbs :links="[__('Chirps')]" />
         </h2>
     </x-slot>
-    <!-- [tl! add:1,1] -->
-    <x-turbo-stream-from source="chirps" />
 
-    <div class="max-w-2xl mx-auto p-4 sm:p-6 lg:p-8">
+    <x-turbo-stream-from source="chirps" /> <!-- [tl! add] -->
+
+    <div class="py-12">
         <!-- [tl! collapse:start] -->
-        <x-turbo-frame id="create_chirp" src="{{ route('chirps.create') }}">
-            <div class="relative flex items-center justify-center py-10 px-4 rounded-lg border border-dotted border-gray-300">
-                <a class="text-gray-700" href="{{ route('chirps.create') }}">
-                    Add a new Chirp
-                    <span class="absolute inset-0"></span>
-                </a>
-            </div>
-        </x-turbo-frame>
+        <div class="max-w-2xl mx-auto sm:px-6 lg:px-8 space-y-6">
+            <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
+                <div class="max-w-xl mx-auto">
+                    <x-turbo-frame id="create_chirp" src="{{ route('chirps.create') }}">
+                        @include('chirps.partials.new-chirp-trigger')
+                    </x-turbo-frame>
 
-        <div id="chirps" class="mt-6 bg-white shadow-sm rounded-lg divide-y">
-            @each('chirps._chirp', $chirps, 'chirp')
+                    <div id="chirps" class="mt-6 bg-white shadow-sm rounded-lg divide-y dark:bg-gray-700 dark:divide-gray-500">
+                        @each('chirps._chirp', $chirps, 'chirp')
+                    </div>
+                </div>
+            </div>
         </div>
         <!-- [tl! collapse:end] -->
     </div>
@@ -876,9 +784,9 @@ Now, we're ready to start broadcasting! First, let's add the `Broadcasts` trait 
 
 namespace App\Models;
 
+use HotwiredLaravel\TurboLaravel\Models\Broadcasts; // [tl! add]
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Tonysm\TurboLaravel\Models\Broadcasts; // [tl! add]
 
 class Chirp extends Model
 {
@@ -946,27 +854,21 @@ class ChirpController extends Controller
         ]);
 
         $chirp = $request->user()->chirps()->create($validated);
-        // [tl! add:1,6]
+        // [tl! add:1,4]
         $chirp->broadcastPrependTo('chirps')
             ->target('chirps')
-            ->partial('chirps._chirp', [
-                'chirp' => $chirp,
-            ])
+            ->partial('chirps._chirp', ['chirp' => $chirp])
             ->toOthers();
 
         if ($request->wantsTurboStream()) {
             return turbo_stream([
                 turbo_stream($chirp, 'prepend'),
                 turbo_stream()->update('create_chirp', view('chirps._form')),
-                turbo_stream()->append('notifications', view('layouts.notification', [
-                    'message' => __('Chirp created.'),
-                ])),
+                turbo_stream()->notice(__('Chirp created.')),
             ]);
         }
 
-        return redirect()
-            ->route('chirps.index')
-            ->with('status', __('Chirp created.'));
+        return redirect()->route('chirps.index')->with('notice', __('Chirp created.'));
     }
     // [tl! collapse:start]
     /**
@@ -1015,15 +917,11 @@ class ChirpController extends Controller
         if ($request->wantsTurboStream()) {
             return turbo_stream([
                 turbo_stream($chirp),
-                turbo_stream()->append('notifications', view('layouts.notification', [
-                    'message' => __('Chirp updated.'),
-                ])),
+                turbo_stream()->notice(__('Chirp updated.')),
             ]);
         }
 
-        return redirect()
-            ->route('chirps.index')
-            ->with('status', __('Chirp updated.'));
+        return redirect()->route('chirps.index')->with('notice', __('Chirp updated.'));
     }
 
     /**
@@ -1041,15 +939,11 @@ class ChirpController extends Controller
         if ($request->wantsTurboStream()) {
             return turbo_stream([
                 turbo_stream($chirp),
-                turbo_stream()->append('notifications', view('layouts.notification', [
-                    'message' => __('Chirp deleted.'),
-                ])),
+                turbo_stream()->notice(__('Chirp deleted.')),
             ]);
         }
 
-        return redirect()
-            ->route('chirps.index')
-            ->with('status', __('Chirp deleted.'));
+        return redirect()->route('chirps.index')->with('notice', __('Chirp deleted.'));
     }
     // [tl! collapse:end]
 }
@@ -1067,7 +961,7 @@ namespace App\Http\Controllers;
 use App\Models\Chirp;
 use Illuminate\Http\Request;
 // [tl! collapse:end add:1,1]
-use function Tonysm\TurboLaravel\dom_id;
+use function HotwiredLaravel\TurboLaravel\dom_id;
 
 class ChirpController extends Controller
 {
@@ -1112,24 +1006,18 @@ class ChirpController extends Controller
 
         $chirp->broadcastPrependTo('chirps')
             ->target('chirps')
-            ->partial('chirps._chirp', [
-                'chirp' => $chirp,
-            ])
+            ->partial('chirps._chirp', ['chirp' => $chirp])
             ->toOthers();
 
         if ($request->wantsTurboStream()) {
             return turbo_stream([
                 turbo_stream($chirp, 'prepend'),
                 turbo_stream()->update('create_chirp', view('chirps._form')),
-                turbo_stream()->append('notifications', view('layouts.notification', [
-                    'message' => __('Chirp created.'),
-                ])),
+                turbo_stream()->notice(__('Chirp created.')),
             ]);
         }
 
-        return redirect()
-            ->route('chirps.index')
-            ->with('status', __('Chirp created.'));
+        return redirect()->route('chirps.index')->with('notice', __('Chirp created.'));
     }
 
     /**
@@ -1174,26 +1062,20 @@ class ChirpController extends Controller
         ]);
 
         $chirp->update($validated);
-        // [tl! add:1,6]
+        // [tl! add:1,4]
         $chirp->broadcastReplaceTo('chirps')
             ->target(dom_id($chirp))
-            ->partial('chirps._chirp', [
-                'chirp' => $chirp,
-            ])
+            ->partial('chirps._chirp', ['chirp' => $chirp])
             ->toOthers();
 
         if ($request->wantsTurboStream()) {
             return turbo_stream([
                 turbo_stream($chirp),
-                turbo_stream()->append('notifications', view('layouts.notification', [
-                    'message' => __('Chirp updated.'),
-                ])),
+                turbo_stream()->notice(__('Chirp updated.')),
             ]);
         }
 
-        return redirect()
-            ->route('chirps.index')
-            ->with('status', __('Chirp updated.'));
+        return redirect()->route('chirps.index')->with('notice', __('Chirp updated.'));
     }
     // [tl! collapse:start]
     /**
@@ -1211,15 +1093,11 @@ class ChirpController extends Controller
         if ($request->wantsTurboStream()) {
             return turbo_stream([
                 turbo_stream($chirp),
-                turbo_stream()->append('notifications', view('layouts.notification', [
-                    'message' => __('Chirp deleted.'),
-                ])),
+                turbo_stream()->notice(__('Chirp deleted.')),
             ]);
         }
 
-        return redirect()
-            ->route('chirps.index')
-            ->with('status', __('Chirp deleted.'));
+        return redirect()->route('chirps.index')->with('notice', __('Chirp deleted.'));
     }
     // [tl! collapse:end]
 }
@@ -1237,7 +1115,7 @@ namespace App\Http\Controllers;
 use App\Models\Chirp;
 use Illuminate\Http\Request;
 
-use function Tonysm\TurboLaravel\dom_id;
+use function HotwiredLaravel\TurboLaravel\dom_id;
 // [tl! collapse:end]
 class ChirpController extends Controller
 {
@@ -1282,24 +1160,18 @@ class ChirpController extends Controller
 
         $chirp->broadcastPrependTo('chirps')
             ->target('chirps')
-            ->partial('chirps._chirp', [
-                'chirp' => $chirp,
-            ])
+            ->partial('chirps._chirp', ['chirp' => $chirp])
             ->toOthers();
 
         if ($request->wantsTurboStream()) {
             return turbo_stream([
                 turbo_stream($chirp, 'prepend'),
-                turbo_stream()->update('create_chirp', view('chirps._form')),
-                turbo_stream()->append('notifications', view('layouts.notification', [
-                    'message' => __('Chirp created.'),
-                ])),
+                turbo_stream()->update('create_chirp', view('chirps.partials.chirp-form')),
+                turbo_stream()->notice(__('Chirp created.')),
             ]);
         }
 
-        return redirect()
-            ->route('chirps.index')
-            ->with('status', __('Chirp created.'));
+        return redirect()->route('chirps.index')->with('notice', __('Chirp created.'));
     }
 
     /**
@@ -1347,23 +1219,17 @@ class ChirpController extends Controller
 
         $chirp->broadcastReplaceTo('chirps')
             ->target(dom_id($chirp))
-            ->partial('chirps._chirp', [
-                'chirp' => $chirp,
-            ])
+            ->partial('chirps._chirp', ['chirp' => $chirp])
             ->toOthers();
 
         if ($request->wantsTurboStream()) {
             return turbo_stream([
                 turbo_stream($chirp),
-                turbo_stream()->append('notifications', view('layouts.notification', [
-                    'message' => __('Chirp updated.'),
-                ])),
+                turbo_stream()->notice(__('Chirp updated.')),
             ]);
         }
 
-        return redirect()
-            ->route('chirps.index')
-            ->with('status', __('Chirp updated.'));
+        return redirect()->route('chirps.index')->with('notice', __('Chirp updated.'));
     }
     // [tl! collapse:end]
     /**
@@ -1385,15 +1251,11 @@ class ChirpController extends Controller
         if ($request->wantsTurboStream()) {
             return turbo_stream([
                 turbo_stream($chirp),
-                turbo_stream()->append('notifications', view('layouts.notification', [
-                    'message' => __('Chirp deleted.'),
-                ])),
+                turbo_stream()->notice(__('Chirp deleted.')),
             ]);
         }
 
-        return redirect()
-            ->route('chirps.index')
-            ->with('status', __('Chirp deleted.'));
+        return redirect()->route('chirps.index')->with('notice', __('Chirp deleted.'));
     }
 }
 ```
@@ -1415,10 +1277,10 @@ Our `Chirp` model would end up looking like this:
 
 namespace App\Models;
 
+use HotwiredLaravel\TurboLaravel\Models\Broadcasts;
 use Illuminate\Broadcasting\PrivateChannel; // [tl! add]
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Tonysm\TurboLaravel\Models\Broadcasts;
 
 class Chirp extends Model
 {
@@ -1457,7 +1319,7 @@ namespace App\Http\Controllers;
 use App\Models\Chirp;
 use Illuminate\Http\Request;
 // [tl! collapse:end remove:1,1]
-use function Tonysm\TurboLaravel\dom_id;
+use function HotwiredLaravel\TurboLaravel\dom_id;
 
 class ChirpController extends Controller
 {
@@ -1499,27 +1361,21 @@ class ChirpController extends Controller
         ]);
 
         $chirp = $request->user()->chirps()->create($validated);
-        // [tl! remove:1,6]
+        // [tl! remove:1,4]
         $chirp->broadcastPrependTo('chirps')
             ->target('chirps')
-            ->partial('chirps._chirp', [
-                'chirp' => $chirp,
-            ])
+            ->partial('chirps._chirp', ['chirp' => $chirp])
             ->toOthers();
 
         if ($request->wantsTurboStream()) {
             return turbo_stream([
                 turbo_stream($chirp, 'prepend'),
                 turbo_stream()->update('create_chirp', view('chirps._form')),
-                turbo_stream()->append('notifications', view('layouts.notification', [
-                    'message' => __('Chirp created.'),
-                ])),
+                turbo_stream()->notice(__('Chirp created.')),
             ]);
         }
 
-        return redirect()
-            ->route('chirps.index')
-            ->with('status', __('Chirp created.'));
+        return redirect()->route('chirps.index')->with('notice', __('Chirp created.'));
     }
     // [tl! collapse:start]
     /**
@@ -1564,26 +1420,20 @@ class ChirpController extends Controller
         ]);
 
         $chirp->update($validated);
-        // [tl! remove:1,6]
+        // [tl! remove:1,4]
         $chirp->broadcastReplaceTo('chirps')
             ->target(dom_id($chirp))
-            ->partial('chirps._chirp', [
-                'chirp' => $chirp,
-            ])
+            ->partial('chirps._chirp', ['chirp' => $chirp])
             ->toOthers();
 
         if ($request->wantsTurboStream()) {
             return turbo_stream([
                 turbo_stream($chirp),
-                turbo_stream()->append('notifications', view('layouts.notification', [
-                    'message' => __('Chirp updated.'),
-                ])),
+                turbo_stream()->notice(__('Chirp updated.')),
             ]);
         }
 
-        return redirect()
-            ->route('chirps.index')
-            ->with('status', __('Chirp updated.'));
+        return redirect()->route('chirps.index')->with('notice', __('Chirp updated.'));
     }
 
     /**
@@ -1605,15 +1455,11 @@ class ChirpController extends Controller
         if ($request->wantsTurboStream()) {
             return turbo_stream([
                 turbo_stream($chirp),
-                turbo_stream()->append('notifications', view('layouts.notification', [
-                    'message' => __('Chirp deleted.'),
-                ])),
+                turbo_stream()->notice(__('Chirp deleted.')),
             ]);
         }
 
-        return redirect()
-            ->route('chirps.index')
-            ->with('status', __('Chirp deleted.'));
+        return redirect()->route('chirps.index')->with('notice', __('Chirp deleted.'));
     }
 }
 ```
@@ -1632,13 +1478,13 @@ php artisan tinker
 And then create a Chirp from there:
 
 ```php
-User::first()->chirps()->create(['message' => 'Hello from Tinker!!'])
-# App\Models\Chirp {#4804
-#   message: "Hello from Tinker!!",
+App\Models\User::first()->chirps()->create(['message' => 'Hello from Tinker!'])
+# App\Models\Chirp {#7426
+#   message: "Hello from Tinker!",
 #   user_id: 1,
-#   updated_at: "2023-01-16 19:46:28",
-#   created_at: "2023-01-16 19:46:28",
-#   id: 13,
+#   updated_at: "2023-11-26 23:01:00",
+#   created_at: "2023-11-26 23:01:00",
+#   id: 18,
 # }
 ```
 
@@ -1646,11 +1492,11 @@ User::first()->chirps()->create(['message' => 'Hello from Tinker!!'])
 
 ### Extra Credit: Fixing The Missing Dropdowns
 
-If we were using a real async queue driver and sending broadcasting to the queue, we'd notice the dropdowns gone missing from our Turbo Stream broadcasts! Refreshing the page would make them appear again. That's because when we send the broadcasts to run in background our partial will render without a session context, so our calls to `Auth::id()` inside of it will always return `null`, which means the dropdown would never render.
+When creating the Chirp from Tinker, even though we see them appearing on the page, if you look closely, you may notice that the dropdown is missing. This would also be true if we were using a real queue driver, since it would defer the rendering of the partial to a background queue worker. That's because when we send the broadcasts to run in background, the partial will render without a request and session contexts, so our calls to `Auth::id()` inside of it will always return `null`, which means the dropdown would never render.
 
-Instead of conditionally rendering the dropdown in the server side, we're always going to render it. Then, we're going to hide it from our users with a sprinkle of JavaScript.
+Instead of conditionally rendering the dropdown in the server side, let's switch to always rendering them and hide it from our users with a sprinkle of JavaScript instead.
 
-First, let's update our `layouts.current-meta.blade.php` partial to include a few things about the currently authenticated user when there's one:
+First, let's update our `layouts.current-meta` partial to include a few things about the currently authenticated user when there's one:
 
 ```blade filename="resources/views/layouts/current-meta.blade.php"
 {{-- Pusher Client-Side Config --}}
@@ -1676,25 +1522,25 @@ Now, update the Stimulus controller to look like this:
 
 ```js filename="resources/js/controllers/visible_to_creator_controller.js"
 import { Controller } from "@hotwired/stimulus"
-import { current } from 'libs/current'
+import { Current } from 'current.js'
 
 // Connects to data-controller="visible-to-creator"
 export default class extends Controller {
     static values = {
-        'id': String,
-    };
+        id: String,
+    }
 
-    static classes = ['hidden'];
+    static classes = ['hidden']
 
     connect() {
-        this.toggleVisibility();
+        this.toggleVisibility()
     }
 
     toggleVisibility() {
-        if (this.idValue == current.identity.id) {
-            this.element.classList.remove(...this.hiddenClasses);
+        if (this.idValue == Current.identity.id) {
+            this.element.classList.remove(...this.hiddenClasses)
         } else {
-            this.element.classList.add(...this.hiddenClasses);
+            this.element.classList.add(...this.hiddenClasses)
         }
     }
 }
@@ -1703,64 +1549,50 @@ export default class extends Controller {
 Now, let's update our `_chirp.blade.php` partial to use this controller instead of handling this in the server-side:
 
 ```blade filename="resources/views/chirps/_chirp.blade.php"
-<x-turbo-frame :id="$chirp" class="block p-6">
-    <div class="flex space-x-2">
+<x-turbo-frame :id="$chirp" class="p-6 flex space-x-2">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600 dark:text-gray-400 -scale-x-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
         <!-- [tl! collapse:start] -->
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600 -scale-x-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-        </svg>
+        <path stroke-linecap="round" stroke-linejoin="round"
+            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
         <!-- [tl! collapse:end] -->
-        <div class="flex-1">
-            <div class="flex justify-between items-center">
-                <!-- [tl! collapse:start] -->
-                <div>
-                    <span class="text-gray-800">{{ $chirp->user->name }}</span>
-                    <small class="ml-2 text-sm text-gray-600">
-                        <x-relative-time :date="$chirp->created_at" />
-                    </small>
-                    @unless ($chirp->created_at->eq($chirp->updated_at))
-                    <small class="text-sm text-gray-600"> &middot; edited</small>
-                    @endunless
-                </div>
-                <!-- [tl! collapse:end remove:1,2 add:3,8] -->
-                @if (Auth::id() === $chirp->user->id)
-                <x-dropdown align="right" width="48">
-                <x-dropdown
-                    align="right"
-                    width="48"
-                    class="hidden"
-                    data-controller="visible-to-creator"
-                    data-visible-to-creator-id-value="{{ $chirp->user_id }}"
-                    data-visible-to-creator-hidden-class="hidden"
-                >
-                    <!-- [tl! collapse:start] -->
-                    <x-slot name="trigger">
-                        <button>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                                <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
-                            </svg>
-                        </button>
-                    </x-slot>
+    </svg>
 
-                    <x-slot name="content">
-                        <a href="{{ route('chirps.edit', $chirp) }}" class="block w-full px-4 py-2 text-left text-sm leading-5 text-gray-700 hover:bg-gray-100 focus:bg-gray-100 transition duration-150 ease-in-out">
-                            Edit
-                        </a>
-
-                        <form action="{{ route('chirps.destroy', $chirp) }}" method="POST">
-                            @method('DELETE')
-
-                            <button class="block w-full px-4 py-2 text-left text-sm leading-5 text-gray-700 hover:bg-gray-100 focus:bg-gray-100 transition duration-150 ease-in-out">
-                                Delete
-                            </button>
-                        </form>
-                    </x-slot>
-                    <!-- [tl! collapse:end] -->
-                </x-dropdown> <!-- [tl! remove:1,1] -->
-                @endif
+    <div class="flex-1">
+        <div class="flex justify-between items-center">
+            <div>
+                <span class="text-gray-800 dark:text-gray-200">{{ $chirp->user->name }}</span>
+                <small class="ml-2 text-sm text-gray-600 dark:text-gray-400"><x-relative-time :date="$chirp->created_at" /></small>
+                @unless ($chirp->created_at->eq($chirp->updated_at))
+                <small class="text-sm text-gray-600"> &middot; edited</small>
+                @endunless
             </div>
-            <p class="mt-4 text-lg text-gray-900">{{ $chirp->message }}</p>
+
+            @if (Auth::id() === $chirp->user->id) <!-- [tl! remove:0,2 add:2,1] -->
+            <x-dropdown align="right" width="48">
+            <x-dropdown align="right" width="48" class="hidden" data-controller="visible-to-creator" data-visible-to-creator-id-value="{{ $chirp->user_id }}" data-visible-to-creator-hidden-class="hidden">
+                <!-- [tl! collapse:start] -->
+                <x-slot name="trigger">
+                    <button>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
+                        </svg>
+                    </button>
+                </x-slot>
+
+                <x-slot name="content">
+                    <x-dropdown-link href="{{ route('chirps.edit', $chirp) }}">{{ __('Edit') }}</x-dropdown-link>
+
+                    <form action="{{ route('chirps.destroy', $chirp) }}" method="POST">
+                        @method('DELETE')
+
+                        <x-dropdown-button type="submit">{{ __('Delete') }}</x-dropdown-button>
+                    </form>
+                </x-slot>
+                <!-- [tl! collapse:end] -->
+            </x-dropdown>
+            @endif <!-- [tl! remove] -->
         </div>
+        <p class="mt-4 text-lg text-gray-900 dark:text-gray-200">{{ $chirp->message }}</p>
     </div>
 </x-turbo-frame>
 ```
@@ -1769,7 +1601,7 @@ Next, we need to tweak our `dropdown.blade.php` Blade component to accept and me
 
 ```blade filename="resources/views/components/dropdown.blade.php"
 @props(['align' => 'right', 'width' => '48', 'contentClasses' => 'py-1 bg-white'])
-@props(['align' => 'right', 'width' => '48', 'class' => '', 'contentClasses' => 'py-1 bg-white', 'dataController' => '', 'dataAction' => ''])
+@props(['align' => 'right', 'width' => '48', 'contentClasses' => 'py-1 bg-white', 'dataController' => '', 'dataAction' => ''])
 <!-- [tl! remove:-2,1 add:-1,1 collapse:start] -->
 @php
 switch ($align) {
@@ -1793,7 +1625,7 @@ switch ($width) {
 @endphp
 <!-- [tl! collapse:end remove:1,1 add:2,1] -->
 <div class="relative" data-controller="dropdown" data-action="turbo:before-cache@window->dropdown#closeNow click@window->dropdown#close close->dropdown#close">
-<div class="relative {{ $class }}" data-controller="dropdown {{ $dataController }}" data-action="turbo:before-cache@window->dropdown#closeNow click@window->dropdown#close close->dropdown#close {{ $dataAction }}" {{ $attributes }}>
+<div {{ $attributes->merge(['class' => 'relative']) }} data-controller="dropdown {{ $dataController }}" data-action="turbo:before-cache@window->dropdown#closeNow click@window->dropdown#close close->dropdown#close {{ $dataAction }}">
     <!-- [tl! collapse:start] -->
     <div data-action="click->dropdown#toggle" data-dropdown-target="trigger">
         {{ $trigger }}
