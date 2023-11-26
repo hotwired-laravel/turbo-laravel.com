@@ -111,7 +111,13 @@ Then, you should be redirected to the Dashboard page:
 
 This Dashboard page is protected by Laravel's auth middleware, so only authenticated users can access it. The registration process automatically authenticates us.
 
-Turbo Breeze is a fork of Laravel Breeze, but customized to work better in a Hotwired context. It comes with all the same components as Laravel Breeze does, except they were rewritten in Stimulus. For an introduction to Stimilus, head out to the [Stimulus Handbook](https://stimulus.hotwired.dev/handbook/introduction).
+Turbo Breeze is a fork of Laravel Breeze, but customized to work better in a Hotwired context. It comes with all the same components as Laravel Breeze does, except they were rewritten in Stimulus. For an introduction to Stimulus, head out to the [Stimulus Handbook](https://stimulus.hotwired.dev/handbook/introduction).
+
+There are a couple differences between Turbo Breeze and Larave Breeze. In Laravel Breeze, your name at the top of the navigation bar is a dropdown. In Turbo Breeze, it's a link to a page with the menu:
+
+![Profile Menu](/images/profile-menu.png)
+
+In Laravel Breeze, all the profile forms are rendered in the same page. In Turbo Breeze, each one has its own dedicated page. That's not a requirement for Hotwired apps, but it works best in a mobile context, we'll see more about that later in this guide.
 
 Now we're ready for our first feature!
 
