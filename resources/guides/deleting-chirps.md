@@ -44,49 +44,15 @@ Route::resource('chirps', ChirpController::class)
     ->middleware(['auth', 'verified']);
 // [tl! collapse:start]
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
 
-require __DIR__.'/auth.php'; // [tl! collapse:end]
-```
+    Route::get('/profile/password/edit', [ProfilePasswordController::class, 'edit'])->name('profile.password.edit');
+    Route::patch('/profile/password', [ProfilePasswordController::class, 'update'])->name('profile.password.update');
 
-However, at this point we can get rid of the `->only()` method call. By default, Laravel will register all those resource routes when we're using the `resource()` route method. The `->only()` method is useful when you want to limite to only a few of those routes:
-
-```php filename="routes/web.php"
-<?php
-// [tl! collapse:start]
-use App\Http\Controllers\ChirpController;
-use App\Http\Controllers\ProfileController;
-use Illuminate\Support\Facades\Route;
-
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
-*/
-
-Route::get('/', function () {
-    return view('welcome');
-});
-
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
-// [tl! collapse:end]
-Route::resource('chirps', ChirpController::class)
-    ->only(['index', 'create', 'store', 'edit', 'update', 'destroy']) // [tl! remove]
-    ->middleware(['auth', 'verified']);
-// [tl! collapse:start]
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/profile/delete', [ProfileController::class, 'delete'])->name('profile.delete');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
@@ -222,9 +188,7 @@ class ChirpController extends Controller
 
         $chirp->delete();
 
-        return redirect()
-            ->route('chirps.index')
-            ->with('status', __('Chirp deleted.'));// [tl! add:end]
+        return redirect()->route('chirps.index')->with('notice', __('Chirp deleted.'));// [tl! add:end]
     }
     // [tl! collapse:end]
 }
@@ -342,16 +306,14 @@ Finally, we can add a delete button to the dropdown menu we created earlier in o
 
 ```blade filename=resources/views/chirps/_chirp.blade.php
 <div class="p-6 flex space-x-2">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600 -scale-x-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600 dark:text-gray-400 -scale-x-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
     </svg>
     <div class="flex-1">
         <div class="flex justify-between items-center">
             <div>
-                <span class="text-gray-800">{{ $chirp->user->name }}</span>
-                <small class="ml-2 text-sm text-gray-600">
-                    <x-relative-time :date="$chirp->created_at" />
-                </small>
+                <span class="text-gray-800 dark:text-gray-200">{{ $chirp->user->name }}</span>
+                <small class="ml-2 text-sm text-gray-600 dark:text-gray-400"><x-relative-time :date="$chirp->created_at" /></small>
                 @unless ($chirp->created_at->eq($chirp->updated_at))
                 <small class="text-sm text-gray-600"> &middot; edited</small>
                 @endunless
@@ -368,16 +330,12 @@ Finally, we can add a delete button to the dropdown menu we created earlier in o
                 </x-slot>
 
                 <x-slot name="content">
-                    <a href="{{ route('chirps.edit', $chirp) }}" class="block w-full px-4 py-2 text-left text-sm leading-5 text-gray-700 hover:bg-gray-100 focus:bg-gray-100 transition duration-150 ease-in-out">App\
-                        Edit
-                    </a>
+                    <x-dropdown-link href="{{ route('chirps.edit', $chirp) }}">{{ __('Edit') }}</x-dropdown-link>
                     <!-- [tl! add:start] -->
                     <form action="{{ route('chirps.destroy', $chirp) }}" method="POST">
                         @method('DELETE')
 
-                        <button class="block w-full px-4 py-2 text-left text-sm leading-5 text-gray-700 hover:bg-gray-100 focus:bg-gray-100 transition duration-150 ease-in-out">
-                            Delete
-                        </button>
+                        <x-dropdown-button type="submit">{{ __('Delete') }}</x-dropdown-button>
                     </form><!-- [tl! add:end] -->
                 </x-slot>
             </x-dropdown>
