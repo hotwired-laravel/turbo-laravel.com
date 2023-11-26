@@ -243,7 +243,7 @@ Now, we need to create our `chirps.edit` view:
 We're using the same `chirp-form` partial the create chirps view uses. However, in this case we're passing down a Chirp model to the form so it can pre-fill the message field. Since we're passing a Chirp model, we can make the form submit to the `chirps.update` endpoint instead of the default `chirps.store` one when no Chirp is passed. Let's make the changes to the `chirps.partials.chirp-form` partial, replace the existing form with this one:
 
 ```blade filename="resources/views/chirps/partials/chirp-form.blade.php"
-<form action="{{ ($chirp ?? false) ? route('chirps.update', $chirp) : route('chirps.store') }}" method="POST">
+<form action="{{ ($chirp ?? false) ? route('chirps.update', $chirp) : route('chirps.store') }}" method="POST" class="w-full">
     @csrf
     @if ($chirp ?? false)
         @method('PUT')

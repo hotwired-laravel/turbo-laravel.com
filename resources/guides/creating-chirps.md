@@ -355,7 +355,7 @@ Then, let's create our `chirps.create` page view with the Chirps form:
 Again, this view is including a `chirp-form` partial. Create that file with the following content:
 
 ```blade filename=resources/views/chirps/partials/chirp-form.blade.php
-<form action="{{ route('chirps.store') }}" method="POST">
+<form action="{{ route('chirps.store') }}" method="POST" class="w-full">
     @csrf
 
     <div>
