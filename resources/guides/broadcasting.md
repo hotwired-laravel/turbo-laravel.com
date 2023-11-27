@@ -1492,7 +1492,7 @@ App\Models\User::first()->chirps()->create(['message' => 'Hello from Tinker!'])
 
 ### Extra Credit: Fixing The Missing Dropdowns
 
-When creating the Chirp from Tinker, even though we see them appearing on the page, if you look closely, you may notice that the dropdown is missing. This would also be true if we were using a real queue driver, since it would defer the rendering of the partial to a background queue worker. That's because when we send the broadcasts to run in background, the partial will render without a request and session contexts, so our calls to `Auth::id()` inside of it will always return `null`, which means the dropdown would never render.
+When creating the Chirp from Tinker, even though we see them appearing on the page, if you look closely, you may notice that the dropdown with the "Edit" and "Delete" buttons is missing. This would also be true if we were using a real queue driver, since it would defer the rendering of the partial to a background queue worker. That's because when we send the broadcasts to run in background, the partial will render without a request and session contexts, so our calls to `Auth::id()` inside of it will always return `null`, which means the dropdown would never render.
 
 Instead of conditionally rendering the dropdown in the server side, let's switch to always rendering them and hide it from our users with a sprinkle of JavaScript instead.
 
