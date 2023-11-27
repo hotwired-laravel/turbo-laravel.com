@@ -428,7 +428,6 @@ Now, update the `layouts/app.blade.php` file to make use of the new title prop:
 
         <!-- Scripts -->
         <x-importmap-tags />
-        <link rel="stylesheet" href="{{ tailwindcss('css/app.css') }}" />
     </head>
     <body class="font-sans antialiased">
         <!-- [tl! collapse:start] -->
