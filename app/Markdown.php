@@ -6,6 +6,7 @@ use App\Markdown\CalloutExtension;
 use App\Markdown\DocsLinksExtension;
 use App\Markdown\DocsVersionExtension;
 use App\Markdown\LinksToTurboFrameExtension;
+use Laravel\Unfenced\UnfencedExtension;
 use League\CommonMark\Environment\Environment;
 use League\CommonMark\Extension\Attributes\AttributesExtension;
 use League\CommonMark\Extension\CommonMark\CommonMarkCoreExtension;
@@ -50,6 +51,7 @@ class Markdown
         $environment->addExtension(new TorchlightExtension());
         $environment->addExtension(new HeadingPermalinkExtension());
         $environment->addExtension(new TableOfContentsExtension());
+        $environment->addExtension(new UnfencedExtension());
 
         return new MarkdownConverter($environment);
     }
