@@ -607,7 +607,7 @@ And that's it!
 
 ## Turbo Stream Flash Macro
 
-So far we've beeing using the default action methods provided by the Turbo Laravel package. The `turbo_stream()` function returns either an instance of a `PendingTurboStreamResponse` or a `MultiplePendingTurboStreamResponse`. Let's add a `notice` macro to the first one to ease generating flash messages Turbo Streams:
+So far we've been using the default action methods provided by the Turbo Laravel package. Let's add a `notice` macro to the `PendingTurboStreamResponse` class, which the `turbo_stream()` function returns (except when we give it an array, which then it returns an instance of the `MultiplePendingTurboStreamResponse` class). This `notice` macro will work as a shorhand for the creating Turbo Streams to append notifications on the page:
 
 ```php filename="app/Providers/AppServiceProvider.php"
 <?php
