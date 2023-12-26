@@ -1,0 +1,5 @@
+# Deploy to these servers.
+servers:
+  web:
+    - IP_ADDRESS_GOES_HERE
+

@@ -5,6 +5,8 @@
 /storage/*.key
 /vendor
 .env
+.env.*
+!.env.*.encrypted
 .env.backup
 .phpunit.result.cache
 Homestead.json
@@ -18,4 +20,7 @@ yarn-error.log
 /public/css/
 /public/dist/
 .tailwindcss-manifest.json
+.importmap-manifest.json
 tailwindcss
+deploy.production.yml
+!deploy.example.yml
