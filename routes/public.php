@@ -4,7 +4,8 @@ use App\Documentation;
 use App\Guide;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['cache.headers:public;max_age=2628000;etag'])->group(function () {
+// Cache them for 30mins...
+Route::middleware(['cache.headers:public;max_age=1800;etag'])->group(function () {
     Route::get('/', function () {
         return view('welcome');
     })->name('welcome');
