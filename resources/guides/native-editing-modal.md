@@ -390,7 +390,7 @@ switch ($width) {
 Now, we need to make sure the options are registered in the Stimulus controller where this Blade component is used. Let's update our `_chirp` blade partial:
 
 ```blade
-<x-turbo-frame :id="$chirp" class="block p-6">
+<x-turbo::frame :id="$chirp" class="block p-6">
     <div class="flex space-x-2">
         <!-- [tl! collapse:start] -->
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600 -scale-x-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -439,7 +439,7 @@ Now, we need to make sure the options are registered in the Stimulus controller 
             <p class="mt-4 text-lg text-gray-900">{{ $chirp->message }}</p>
         </div>
     </div>
-</x-turbo-frame>
+</x-turbo::frame>
 ```
 
 This should get our dropdown appearing as a BottomSheet menu!

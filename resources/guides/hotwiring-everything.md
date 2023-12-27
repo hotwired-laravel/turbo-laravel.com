@@ -23,9 +23,9 @@ Our application works, but we could improve it. Instead of sending users to a de
             <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
                 <div class="max-w-xl mx-auto">
                     @include('chirps.partials.new-chirp-trigger')
-                    <x-turbo-frame id="create_chirp" src="{{ route('chirps.create') }}">
+                    <x-turbo::frame id="create_chirp" src="{{ route('chirps.create') }}">
                         @include('chirps.partials.new-chirp-trigger')
-                    </x-turbo-frame><!-- [tl! remove:-3,1 add:-2,3] -->
+                    </x-turbo::frame><!-- [tl! remove:-3,1 add:-2,3] -->
 
                     <div class="mt-6 bg-white shadow-sm rounded-lg divide-y dark:bg-gray-700 dark:divide-gray-500">
                         @each('chirps._chirp', $chirps, 'chirp')
@@ -52,9 +52,9 @@ For that to work, we also need to wrap our create form with a matching Turbo Fra
             <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
                 <div class="max-w-xl mx-auto">
                     @include('chirps.partials.chirp-form')
-                    <x-turbo-frame id="create_chirp" target="_top">
+                    <x-turbo::frame id="create_chirp" target="_top">
                         @include('chirps.partials.chirp-form')
-                    </x-turbo-frame><!-- [tl! remove:-3,1 add:-2,3]-->
+                    </x-turbo::frame><!-- [tl! remove:-3,1 add:-2,3]-->
                 </div>
             </div>
         </div>
@@ -89,9 +89,9 @@ Before we change the `ChirpController`, let's give our list of chirps wrapper el
         <div class="max-w-2xl mx-auto sm:px-6 lg:px-8 space-y-6">
             <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
                 <div class="max-w-xl mx-auto">
-                    <x-turbo-frame id="create_chirp" src="{{ route('chirps.create') }}">
+                    <x-turbo::frame id="create_chirp" src="{{ route('chirps.create') }}">
                         @include('chirps.partials.new-chirp-trigger')
-                    </x-turbo-frame>
+                    </x-turbo::frame>
 
                     <div class="mt-6 bg-white shadow-sm rounded-lg divide-y dark:bg-gray-700 dark:divide-gray-500">
                     <div id="chirps" class="mt-6 bg-white shadow-sm rounded-lg divide-y dark:bg-gray-700 dark:divide-gray-500"> <!-- [tl! remove:-1,1 add]-->
@@ -248,7 +248,7 @@ To do that, we need to tweak our `chirps._chirp` partial and wrap it with a Turb
 
 ```blade filename=resources/views/chirps/_chirp.blade.php
 <div class="p-6 flex space-x-2">
-<x-turbo-frame :id="$chirp" class="p-6 flex space-x-2"> <!-- [tl! remove:-1,1 add] -->
+<x-turbo::frame :id="$chirp" class="p-6 flex space-x-2"> <!-- [tl! remove:-1,1 add] -->
     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600 dark:text-gray-400 -scale-x-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
         <!-- [tl! collapse:start] -->
         <path stroke-linecap="round" stroke-linejoin="round"
@@ -292,7 +292,7 @@ To do that, we need to tweak our `chirps._chirp` partial and wrap it with a Turb
         <!-- [tl! collapse:end] -->
     </div>
 </div>
-</x-turbo-frame> <!-- [tl! remove:-1,1 add]-->
+</x-turbo::frame> <!-- [tl! remove:-1,1 add]-->
 ```
 
 Now, let's also update the `chirps.edit` page to add a wrapping Turbo Frame around the form there:
@@ -310,9 +310,9 @@ Now, let's also update the `chirps.edit` page to add a wrapping Turbo Frame arou
             <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
                 <div class="max-w-xl mx-auto">
                     @include('chirps.partials.chirp-form', ['chirp' => $chirp])
-                    <x-turbo-frame :id="$chirps" target="_top">
+                    <x-turbo::frame :id="$chirps" target="_top">
                         @include('chirps.partials.chirp-form', ['chirp' => $chirp])
-                    </x-turbo-frame><!-- [tl! remove:-3,1 add:-2,3] -->
+                    </x-turbo::frame><!-- [tl! remove:-3,1 add:-2,3] -->
                 </div>
             </div>
         </div>

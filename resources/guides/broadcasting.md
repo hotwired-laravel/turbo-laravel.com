@@ -743,7 +743,7 @@ Broadcast::channel('chirps', function () {
 });
 ```
 
-Now, let's update the `chirps/index.blade.php` to add the `x-turbo-stream-from` Blade component that ships with Turbo Laravel:
+Now, let's update the `chirps/index.blade.php` to add the `x-turbo::stream-from` Blade component that ships with Turbo Laravel:
 
 ```blade filename="resources/views/chirps/index.blade.php"
 <x-app-layout>
@@ -753,16 +753,16 @@ Now, let's update the `chirps/index.blade.php` to add the `x-turbo-stream-from` 
         </h2>
     </x-slot>
 
-    <x-turbo-stream-from source="chirps" /> <!-- [tl! add] -->
+    <x-turbo::stream-from source="chirps" /> <!-- [tl! add] -->
 
     <div class="py-12">
         <!-- [tl! collapse:start] -->
         <div class="max-w-2xl mx-auto sm:px-6 lg:px-8 space-y-6">
             <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
                 <div class="max-w-xl mx-auto">
-                    <x-turbo-frame id="create_chirp" src="{{ route('chirps.create') }}">
+                    <x-turbo::frame id="create_chirp" src="{{ route('chirps.create') }}">
                         @include('chirps.partials.new-chirp-trigger')
-                    </x-turbo-frame>
+                    </x-turbo::frame>
 
                     <div id="chirps" class="mt-6 bg-white shadow-sm rounded-lg divide-y dark:bg-gray-700 dark:divide-gray-500">
                         @each('chirps._chirp', $chirps, 'chirp')
@@ -1549,7 +1549,7 @@ export default class extends Controller {
 Now, let's update our `_chirp.blade.php` partial to use this controller instead of handling this in the server-side:
 
 ```blade filename="resources/views/chirps/_chirp.blade.php"
-<x-turbo-frame :id="$chirp" class="p-6 flex space-x-2">
+<x-turbo::frame :id="$chirp" class="p-6 flex space-x-2">
     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600 dark:text-gray-400 -scale-x-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
         <!-- [tl! collapse:start] -->
         <path stroke-linecap="round" stroke-linejoin="round"
@@ -1594,7 +1594,7 @@ Now, let's update our `_chirp.blade.php` partial to use this controller instead 
         </div>
         <p class="mt-4 text-lg text-gray-900 dark:text-gray-200">{{ $chirp->message }}</p>
     </div>
-</x-turbo-frame>
+</x-turbo::frame>
 ```
 
 Next, we need to tweak our `dropdown.blade.php` Blade component to accept and merge the `class`, `data-controller`, and `data-action` attributes:

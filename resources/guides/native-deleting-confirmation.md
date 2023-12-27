@@ -13,7 +13,7 @@ Turbo offers a `data-turbo-confirm` attribute we can use in forms and links. By 
 First, let's update our `chirps/_chirp.blade.php` file and add the `data-turbo-confirm` to the delete form:
 
 ```blade
-<x-turbo-frame :id="$chirp" class="block p-6">
+<x-turbo::frame :id="$chirp" class="block p-6">
     <div class="flex space-x-2">
         <!-- [tl! collapse:start] -->
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600 -scale-x-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -61,7 +61,7 @@ First, let's update our `chirps/_chirp.blade.php` file and add the `data-turbo-c
             <p class="mt-4 text-lg text-gray-900">{{ $chirp->message }}</p>
         </div>
     </div>
-</x-turbo-frame>
+</x-turbo::frame>
 ```
 
 That should get the JS confirm appearing both in the webapp and native.

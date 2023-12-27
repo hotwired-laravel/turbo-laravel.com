@@ -20,14 +20,14 @@ We could technically prevent the entire section from even rendering on requests 
 
     <div class="max-w-2xl mx-auto p-4 sm:p-6 lg:p-8">
         @unlessturbonative<!-- [tl! add] -->
-        <x-turbo-frame id="create_chirp" src="{{ route('chirps.create') }}">
+        <x-turbo::frame id="create_chirp" src="{{ route('chirps.create') }}">
             <div class="relative flex items-center justify-center py-10 px-4 rounded-lg border border-dotted border-gray-300">
                 <a class="text-gray-700" href="{{ route('chirps.create') }}">
                     Add a new Chirp
                     <span class="absolute inset-0"></span>
                 </a>
             </div>
-        </x-turbo-frame>
+        </x-turbo::frame>
         @endunlessturbonative<!-- [tl! add] -->
 
         <div id="chirps" class="mt-6 bg-white shadow-sm rounded-lg divide-y">
@@ -129,15 +129,15 @@ With that, we can use the new modifier like any other default modifier in Tailwi
     </x-slot>
     <!-- [tl! collapse:end] -->
     <div class="max-w-2xl mx-auto p-4 sm:p-6 lg:p-8">
-        <x-turbo-frame id="create_chirp" src="{{ route('chirps.create') }}">
-        <x-turbo-frame id="create_chirp" src="{{ route('chirps.create') }}" class="turbo-native:hidden" loading="lazy"><!-- [tl! remove:-1,1 add] -->
+        <x-turbo::frame id="create_chirp" src="{{ route('chirps.create') }}">
+        <x-turbo::frame id="create_chirp" src="{{ route('chirps.create') }}" class="turbo-native:hidden" loading="lazy"><!-- [tl! remove:-1,1 add] -->
             <div class="relative flex items-center justify-center py-10 px-4 rounded-lg border border-dotted border-gray-300">
                 <a class="text-gray-700" href="{{ route('chirps.create') }}">
                     Add a new Chirp
                     <span class="absolute inset-0"></span>
                 </a>
             </div>
-        </x-turbo-frame>
+        </x-turbo::frame>
 
         <div id="chirps" class="mt-6 bg-white shadow-sm rounded-lg divide-y">
             @each('chirps._chirp', $chirps, 'chirp')
@@ -161,7 +161,7 @@ Let's also tweak our index page a bit to remove some padding and unnecessary mar
     <!-- [tl! collapse:end] -->
     <div class="max-w-2xl mx-auto p-4 sm:p-6 lg:p-8">
     <div class="max-w-2xl mx-auto p-4 sm:p-6 lg:p-8 turbo-native:p-0"><!-- [tl! remove:-1,1 add] -->
-        <x-turbo-frame id="create_chirp" src="{{ route('chirps.create') }}" class="turbo-native:hidden" loading="lazy">
+        <x-turbo::frame id="create_chirp" src="{{ route('chirps.create') }}" class="turbo-native:hidden" loading="lazy">
             <!-- [tl! collapse:start ]-->
             <div class="relative flex items-center justify-center py-10 px-4 rounded-lg border border-dotted border-gray-300">
                 <a class="text-gray-700" href="{{ route('chirps.create') }}">
@@ -170,7 +170,7 @@ Let's also tweak our index page a bit to remove some padding and unnecessary mar
                 </a>
             </div>
             <!-- [tl! collapse:end] -->
-        </x-turbo-frame>
+        </x-turbo::frame>
 
         <div id="chirps" class="mt-6 bg-white shadow-sm rounded-lg divide-y">
         <div id="chirps" class="mt-6 bg-white shadow-sm rounded-lg divide-y turbo-native:mt-0"><!-- [tl! remove:-1,1 add] -->
@@ -851,9 +851,9 @@ Then, in the `resources/views/chirps/create.blade.php` file, set the `:title` pr
     </x-slot>
 
     <div class="max-w-2xl mx-auto p-4 sm:p-6 lg:p-8">
-        <x-turbo-frame id="create_chirp" target="_top">
+        <x-turbo::frame id="create_chirp" target="_top">
             @include('chirps._form')
-        </x-turbo-frame>
+        </x-turbo::frame>
     </div>
     <!-- [tl! collapse:end] -->
 </x-app-layout>
