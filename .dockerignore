@@ -1,6 +1,6 @@
 /vendor/
 /node_modules/
 /tests/
-/resources/docs/
+/resources/sources/
 .env.*
 deploy.*.yml
