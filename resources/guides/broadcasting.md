@@ -510,7 +510,7 @@ For that reason, we're gonna add some meta tags to our `app.blade.php` and `gues
         <link rel="stylesheet" href="https://fonts.bunny.net/css2?family=Nunito:wght@400;600;700&display=swap">
 
         <!-- Scripts -->
-        <x-importmap-tags />
+        <x-importmap::tags />
         <link rel="stylesheet" href="{{ tailwindcss('css/app.css') }}">
         <!-- [tl! collapse:end] -->
     </head>
@@ -557,7 +557,7 @@ And also update the `guest` layout:
         <link rel="stylesheet" href="https://fonts.bunny.net/css2?family=Nunito:wght@400;600;700&display=swap">
 
         <!-- Scripts -->
-        <x-importmap-tags />
+        <x-importmap::tags />
         <link rel="stylesheet" href="{{ tailwindcss('css/app.css') }}">
         <!-- [tl! collapse:end] -->
     </head>
