@@ -18,7 +18,7 @@
         "laravel/sanctum": "^3.0",
         "laravel/tinker": "^2.7",
         "laravel/unfenced": "dev-main",
-        "tonysm/importmap-laravel": "^1.2",
+        "tonysm/importmap-laravel": "^2.0.0-beta1",
         "tonysm/stimulus-laravel": "^0.0.1",
         "tonysm/tailwindcss-laravel": "^0.7.0",
         "tonysm/turbo-laravel": "dev-main",

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-php artisan importmap:optimize
-
 if [ $# -gt 0 ]; then
     exec "$@"
 else
+    # Do things like running migrations here...
+
     exec /init
 fi

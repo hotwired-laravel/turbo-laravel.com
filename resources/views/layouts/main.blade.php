@@ -24,7 +24,7 @@
     <!-- Styles -->
     <link rel="stylesheet" href="{{ tailwindcss('css/app.css') }}" />
 
-    <x-importmap-tags />
+    <x-importmap::tags />
 </head>
 <body class="font-sans antialiased text-gray-900">
     <div class="flex flex-col justify-between w-full min-h-screen bg-gray-50" data-controller="nav-highlight">

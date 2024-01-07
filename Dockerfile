@@ -23,7 +23,7 @@ COPY --from=builder --chown=webuser:webgroup /var/www/html/vendor /var/www/html/
 # Re-run install, but now with scripts and optimizing the autoloader...
 RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 
-# Build TailwindCSS
-RUN php artisan tailwindcss:download && php artisan tailwindcss:build --prod
+# Build TailwindCSS and Importmap
+RUN php artisan tailwindcss:download && php artisan tailwindcss:build --prod && php artisan importmap:optimize
 
 ENTRYPOINT ["/var/www/html/resources/docker/entrypoint.sh"]
