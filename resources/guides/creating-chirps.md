@@ -802,7 +802,7 @@ php artisan tinker
 Next, execute the following code to display the Chirps in your database:
 
 ```php
-App\Model\Chirp::all();
+App\Models\Chirp::all();
 ```
 
 ```bash
