@@ -69,11 +69,11 @@ PUT/PATCH | `/chirps/{chirp}`      | update       | `chirps.update`
 
 ## Updating our partial
 
-Next, let's update our `chirps._chirp` Blade partial to have an edit form for existing Chirps.
+Next, let's update our `chirps.partials.chirp` Blade partial to have an edit form for existing Chirps.
 
 We're going to use the `<x-dropdown>` component that comes with Turbo Breeze, which we'll only display to the Chirp author. We'll also display an indication if a Chirp has been edited by comparing the Chirp's `created_at` date with its `updated_at` date:
 
-```blade filename="resources/views/chirps/_chirp.blade.php"
+```blade filename="resources/views/chirps/partials/chirp.blade.php"
 <div class="p-6 flex space-x-2">
     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600 -scale-x-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
@@ -84,7 +84,7 @@ We're going to use the `<x-dropdown>` component that comes with Turbo Breeze, wh
                 <span class="text-gray-800">{{ $chirp->user->name }}</span>
                 <small class="ml-2 text-sm text-gray-600"><x-relative-time :date="$chirp->created_at" /></small>
                 @unless ($chirp->created_at->eq($chirp->updated_at))<!-- [tl! add:start] -->
-                <small class="text-sm text-gray-600"> &middot; edited</small>
+                <small class="text-sm text-gray-600 dark:text-gray-500"> &middot; edited</small>
                 @endunless<!-- [tl! add:end] -->
             </div>
             <!-- [tl! add:start] -->
@@ -232,7 +232,7 @@ Now, we need to create our `chirps.edit` view:
         <div class="max-w-2xl mx-auto sm:px-6 lg:px-8 space-y-6">
             <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
                 <div class="max-w-xl mx-auto">
-                    @include('chirps.partials.chirp-form', ['chirp' => $chirp])
+                    @include('chirps.partials.form', ['chirp' => $chirp])
                 </div>
             </div>
         </div>
@@ -240,9 +240,9 @@ Now, we need to create our `chirps.edit` view:
 </x-app-layout>
 ```
 
-We're using the same `chirp-form` partial the create chirps view uses. However, in this case we're passing down a Chirp model to the form so it can pre-fill the message field. Since we're passing a Chirp model, we can make the form submit to the `chirps.update` endpoint instead of the default `chirps.store` one when no Chirp is passed. Let's make the changes to the `chirps.partials.chirp-form` partial, replace the existing form with this one:
+We're using the same `form` partial the create chirps view uses. However, in this case we're passing down a Chirp model to the form so it can pre-fill the message field. Since we're passing a Chirp model, we can make the form submit to the `chirps.update` endpoint instead of the default `chirps.store` one when no Chirp is passed. Let's make the changes to the `chirps.partials.form` partial, replace the existing form with this one:
 
-```blade filename="resources/views/chirps/partials/chirp-form.blade.php"
+```blade filename="resources/views/chirps/partials/form.blade.php"
 <form action="{{ ($chirp ?? false) ? route('chirps.update', $chirp) : route('chirps.store') }}" method="POST" class="w-full">
     @csrf
     @if ($chirp ?? false)
@@ -251,17 +251,17 @@ We're using the same `chirp-form` partial the create chirps view uses. However, 
 
     <div>
         <x-input-label for="message" :value="__('Message')" class="sr-only" />
-        <x-textarea-input id="message" name="message" autofocus placeholder="{{ __('What\'s on your mind?') }}" class="block w-full" :value="$chirp?->message ?? ''" />
+        <x-textarea-input id="message" name="message" autofocus placeholder="{{ __('What\'s on your mind?') }}" class="block w-full" :value="old('message', $chirp?->message ?? '')" />
         <x-input-error :messages="$errors->get('message')" class="mt-2" />
     </div>
 
-    <div class="mt-6">
+    <div class="mt-6 flex items-center space-x-4">
         <x-primary-button>
             {{ __('Chirp') }}
         </x-primary-button>
 
         @if ($chirp ?? false)
-        <a href="{{ route('chirps.index') }}" class="mt-4">{{ __('Cancel') }}</a>
+        <a href="{{ route('chirps.index') }}" class="dark:text-gray-400">{{ __('Cancel') }}</a>
         @endif
     </div>
 </form>

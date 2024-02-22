@@ -344,7 +344,7 @@ Then, let's create our `chirps.create` page view with the Chirps form:
         <div class="max-w-2xl mx-auto sm:px-6 lg:px-8 space-y-6">
             <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
                 <div class="max-w-xl mx-auto">
-                    @include('chirps.partials.chirp-form')
+                    @include('chirps.partials.form')
                 </div>
             </div>
         </div>
@@ -352,9 +352,9 @@ Then, let's create our `chirps.create` page view with the Chirps form:
 </x-app-layout>
 ```
 
-Again, this view is including a `chirp-form` partial. Create that file with the following content:
+Again, this view is including a `form` partial. Create that file with the following content:
 
-```blade filename=resources/views/chirps/partials/chirp-form.blade.php
+```blade filename=resources/views/chirps/partials/form.blade.php
 <form action="{{ route('chirps.store') }}" method="POST" class="w-full">
     @csrf
 
@@ -926,7 +926,7 @@ class ChirpController extends Controller
 }
 ```
 
-Then, let's change our `layouts.app` file to include a `layouts.notifications` partial:
+Then, let's change our `layouts.app` file to include a `layouts.partials.notifications` partial:
 
 ```blade filename="resources/views/layouts/app.blade.php"
 <!DOCTYPE html>
@@ -949,7 +949,7 @@ Then, let's change our `layouts.app` file to include a `layouts.notifications` p
     <body class="font-sans antialiased">
         <div class="min-h-screen bg-gray-100">
             @include('layouts.navigation')
-            @include('layouts.notifications') <!-- [tl! add]-->
+            @include('layouts.partials.notifications') <!-- [tl! add]-->
             <!-- [tl! collapse:start] -->
             <!-- Page Heading -->
             <header class="bg-white shadow">
@@ -968,19 +968,19 @@ Then, let's change our `layouts.app` file to include a `layouts.notifications` p
 </html>
 ```
 
-Next, let's create the `layouts.notifications` wrapper partial:
+Next, let's create the `layouts.partials.notifications` wrapper partial:
 
-```blade filename="resources/views/layouts/notifications.blade.php"
+```blade filename="resources/views/layouts/partials/notifications.blade.php"
 <div id="notifications" class="fixed top-10 left-0 right-0 flex flex-col items-center justify-center space-y-2 z-10 opacity-80">
     @if (session()->has('notice'))
-        @include('layouts.notification', ['message' => session('notice')])
+        @include('layouts.partials.notice', ['message' => session('notice')])
     @endif
 </div>
 ```
 
-So, each notification will render with the `layouts.notification` (singular) partial and will be added to the wrapper partial. Let's add the indivitual notification partial:
+So, each notification will render with the `layouts.partials.notice` (singular) partial and will be added to the wrapper partial. Let's add the indivitual notification partial:
 
-```blade filename="resources/views/layouts/notification.blade.php"
+```blade filename="resources/views/layouts/partials/notice.blade.php"
 <div data-turbo-temporary data-controller="flash" data-action="animationend->flash#remove" class="py-1 px-4 leading-7 text-center text-white rounded-full bg-gray-900 transition-all animate-appear-then-fade-out">
     {{ $message }}
 </div>

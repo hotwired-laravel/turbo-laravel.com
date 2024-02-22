@@ -28,7 +28,7 @@ Our application works, but we could improve it. Instead of sending users to a de
                     </x-turbo::frame><!-- [tl! remove:-3,1 add:-2,3] -->
 
                     <div class="mt-6 bg-white shadow-sm rounded-lg divide-y dark:bg-gray-700 dark:divide-gray-500">
-                        @each('chirps._chirp', $chirps, 'chirp')
+                        @each('chirps.partials.chirp', $chirps, 'chirp')
                     </div>
                 </div>
             </div>
@@ -51,9 +51,9 @@ For that to work, we also need to wrap our create form with a matching Turbo Fra
         <div class="max-w-2xl mx-auto sm:px-6 lg:px-8 space-y-6">
             <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
                 <div class="max-w-xl mx-auto">
-                    @include('chirps.partials.chirp-form')
+                    @include('chirps.partials.form')
                     <x-turbo::frame id="create_chirp" target="_top">
-                        @include('chirps.partials.chirp-form')
+                        @include('chirps.partials.form')
                     </x-turbo::frame><!-- [tl! remove:-3,1 add:-2,3]-->
                 </div>
             </div>
@@ -95,7 +95,7 @@ Before we change the `ChirpController`, let's give our list of chirps wrapper el
 
                     <div class="mt-6 bg-white shadow-sm rounded-lg divide-y dark:bg-gray-700 dark:divide-gray-500">
                     <div id="chirps" class="mt-6 bg-white shadow-sm rounded-lg divide-y dark:bg-gray-700 dark:divide-gray-500"> <!-- [tl! remove:-1,1 add]-->
-                        @each('chirps._chirp', $chirps, 'chirp')
+                        @each('chirps.partials.chirp', $chirps, 'chirp')
                     </div>
                 </div>
             </div>
@@ -157,8 +157,8 @@ class ChirpController extends Controller
         if ($request->wantsTurboStream()) {
             return turbo_stream([
                 turbo_stream($chirp, 'prepend'),
-                turbo_stream()->update('create_chirp', view('chirps.partials.chirp-form')),
-                turbo_stream()->append('notifications', view('layouts.notification', ['message' => __('Chirp created.')])),
+                turbo_stream()->update('create_chirp', view('chirps.partials.form')),
+                turbo_stream()->append('notifications', view('layouts.partials.notice', ['message' => __('Chirp created.')])),
             ]);
         }// [tl! add:end]
 
@@ -244,9 +244,9 @@ Let's also implement inline editing for our chirps.
 
 ## Displaying the edit chirps form inline
 
-To do that, we need to tweak our `chirps._chirp` partial and wrap it with a Turbo Frame. Instead of showing you a long Git diff, replace the existing partial with this one:
+To do that, we need to tweak our `chirps.partials.chirp` partial and wrap it with a Turbo Frame. Instead of showing you a long Git diff, replace the existing partial with this one:
 
-```blade filename=resources/views/chirps/_chirp.blade.php
+```blade filename=resources/views/chirps/partials/chirp.blade.php
 <div class="p-6 flex space-x-2">
 <x-turbo::frame :id="$chirp" class="p-6 flex space-x-2"> <!-- [tl! remove:-1,1 add] -->
     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600 dark:text-gray-400 -scale-x-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -309,9 +309,9 @@ Now, let's also update the `chirps.edit` page to add a wrapping Turbo Frame arou
         <div class="max-w-2xl mx-auto sm:px-6 lg:px-8 space-y-6">
             <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
                 <div class="max-w-xl mx-auto">
-                    @include('chirps.partials.chirp-form', ['chirp' => $chirp])
-                    <x-turbo::frame :id="$chirps" target="_top">
-                        @include('chirps.partials.chirp-form', ['chirp' => $chirp])
+                    @include('chirps.partials.form', ['chirp' => $chirp])
+                    <x-turbo::frame :id="$chirp" target="_top">
+                        @include('chirps.partials.form', ['chirp' => $chirp])
                     </x-turbo::frame><!-- [tl! remove:-3,1 add:-2,3] -->
                 </div>
             </div>
@@ -376,8 +376,8 @@ class ChirpController extends Controller
         if ($request->wantsTurboStream()) {
             return turbo_stream([
                 turbo_stream($chirp, 'prepend'),
-                turbo_stream()->update('create_chirp', view('chirps.partials.chirp-form')),
-                turbo_stream()->append('notifications', view('layouts.notification', ['message' => __('Chirp created.')])),
+                turbo_stream()->update('create_chirp', view('chirps.partials.form')),
+                turbo_stream()->append('notifications', view('layouts.partials.notice', ['message' => __('Chirp created.')])),
             ]);
         }
 
@@ -430,7 +430,7 @@ class ChirpController extends Controller
         if ($request->wantsTurboStream()) {// [tl! add:start]
             return turbo_stream([
                 turbo_stream($chirp),
-                turbo_stream()->append('notifications', view('layouts.notification', ['message' => __('Chirp updated.')])),
+                turbo_stream()->append('notifications', view('layouts.partials.notice', ['message' => __('Chirp updated.')])),
             ]);
         }// [tl! add:end]
 
@@ -516,8 +516,8 @@ class ChirpController extends Controller
         if ($request->wantsTurboStream()) {
             return turbo_stream([
                 turbo_stream($chirp, 'prepend'),
-                turbo_stream()->update('create_chirp', view('chirps.partials.chirp-form')),
-                turbo_stream()->append('notifications', view('layouts.notification', ['message' => __('Chirp created.')])),
+                turbo_stream()->update('create_chirp', view('chirps.partials.form')),
+                turbo_stream()->append('notifications', view('layouts.partials.notice', ['message' => __('Chirp created.')])),
             ]);
         }
 
@@ -570,7 +570,7 @@ class ChirpController extends Controller
         if ($request->wantsTurboStream()) {
             return turbo_stream([
                 turbo_stream($chirp),
-                turbo_stream()->append('notifications', view('layouts.notification', ['message' => __('Chirp updated.')])),
+                turbo_stream()->append('notifications', view('layouts.partials.notice', ['message' => __('Chirp updated.')])),
             ]);
         }
 
@@ -594,7 +594,7 @@ class ChirpController extends Controller
         if ($request->wantsTurboStream()) { // [tl! add:start]
             return turbo_stream([
                 turbo_stream($chirp),
-                turbo_stream()->append('notifications', view('layouts.notification', ['message' => __('Chirp deleted.')])),
+                turbo_stream()->append('notifications', view('layouts.partials.notice', ['message' => __('Chirp deleted.')])),
             ]);
         } // [tl! add:end]
 
@@ -640,7 +640,7 @@ class AppServiceProvider extends ServiceProvider
     {
         //
         PendingTurboStreamResponse::macro('notice', function ($message) { // [tl! remove:-1,1 add:0,5]
-            return turbo_stream()->append('notifications', view('layouts.notification', [
+            return turbo_stream()->append('notifications', view('layouts.partials.notice', [
                 'message' => $message,
             ]));
         });
@@ -700,8 +700,8 @@ class ChirpController extends Controller
         if ($request->wantsTurboStream()) {
             return turbo_stream([
                 turbo_stream($chirp, 'prepend'),
-                turbo_stream()->update('create_chirp', view('chirps._form')),
-                turbo_stream()->append('notifications', view('layouts.notification', ['message' => __('Chirp created.')])),
+                turbo_stream()->update('create_chirp', view('chirps.partials.form')),
+                turbo_stream()->append('notifications', view('layouts.partials.notice', ['message' => __('Chirp created.')])),
                 turbo_stream()->notice(__('Chirp created.')),// [tl! remove:-1,1 add]
             ]);
         }
@@ -755,7 +755,7 @@ class ChirpController extends Controller
         if ($request->wantsTurboStream()) {
             return turbo_stream([
                 turbo_stream($chirp),
-                turbo_stream()->append('notifications', view('layouts.notification', ['message' => __('Chirp updated.')])),
+                turbo_stream()->append('notifications', view('layouts.partials.notice', ['message' => __('Chirp updated.')])),
                 turbo_stream()->notice(__('Chirp updated.')), // [tl! remove:-1,1 add]
             ]);
         }
@@ -779,7 +779,7 @@ class ChirpController extends Controller
         if ($request->wantsTurboStream()) {
             return turbo_stream([
                 turbo_stream($chirp),
-                turbo_stream()->append('notifications', view('layouts.notification', ['message' => __('Chirp deleted.')])),
+                turbo_stream()->append('notifications', view('layouts.partials.notice', ['message' => __('Chirp deleted.')])),
                 turbo_stream()->notice(__('Chirp deleted.')),// [tl! remove:-1,1 add]
             ]);
         }
