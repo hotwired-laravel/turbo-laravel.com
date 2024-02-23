@@ -517,8 +517,8 @@ For that reason, we're gonna add some meta tags to our `app.blade.php` and `gues
     <body class="font-sans antialiased">
         <!-- [tl! collapse:start] -->
         <div class="min-h-screen bg-gray-100">
-            @include('layouts.navigation')
-            @include('layouts.notifications')
+            @include('layouts.partials.navigation')
+            @include('layouts.partials.notifications')
 
             <!-- Page Heading -->
             @if (isset($header))
@@ -1546,9 +1546,9 @@ export default class extends Controller {
 }
 ```
 
-Now, let's update our `_chirp.blade.php` partial to use this controller instead of handling this in the server-side:
+Now, let's update our `chirps.partials.chirp.blade.php` partial to use this controller instead of handling this in the server-side:
 
-```blade filename="resources/views/chirps/_chirp.blade.php"
+```blade filename="resources/views/chirps/partials/chirp.blade.php"
 <x-turbo::frame :id="$chirp" class="p-6 flex space-x-2">
     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600 dark:text-gray-400 -scale-x-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
         <!-- [tl! collapse:start] -->

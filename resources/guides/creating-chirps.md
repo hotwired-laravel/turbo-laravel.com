@@ -432,7 +432,7 @@ Now, update the `layouts/app.blade.php` file to make use of the new title prop:
     <body class="font-sans antialiased">
         <!-- [tl! collapse:start] -->
         <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
-            @include('layouts.navigation')
+            @include('layouts.partials.navigation')
 
             <!-- Page Heading -->
             @if (isset($header))
@@ -463,11 +463,11 @@ If you click on that link, you will see the form to create Chirps and the breadc
 
 ### Navigation menu
 
-Let's take a moment to add a link to the navigation menu provided by Breeze.
+Let's take a moment to add a link to the navigation menu provided by Turbo Breeze.
 
-Update the `navigation` Blade component provided by Breeze to add a menu item for desktop screens:
+Update the `navigation` partial provided by Turbo Breeze to add a menu item for desktop screens:
 
-```blade filename=resources/views/components/navigation.blade.php
+```blade filename=resources/views/layouts/partials/navigation.blade.php
 <nav
     data-controller="responsive-nav"
     data-action="
@@ -948,7 +948,7 @@ Then, let's change our `layouts.app` file to include a `layouts.partials.notific
     </head>
     <body class="font-sans antialiased">
         <div class="min-h-screen bg-gray-100">
-            @include('layouts.navigation')
+            @include('layouts.partials.navigation')
             @include('layouts.partials.notifications') <!-- [tl! add]-->
             <!-- [tl! collapse:start] -->
             <!-- Page Heading -->

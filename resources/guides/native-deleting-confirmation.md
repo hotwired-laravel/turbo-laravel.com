@@ -10,7 +10,7 @@ Right now we're not showing a confirmation when the user presses the delete butt
 
 Turbo offers a `data-turbo-confirm` attribute we can use in forms and links. By default, that uses the [JS confirm](https://developer.mozilla.org/en-US/docs/Web/API/Window/confirm) feature. Let's start with that.
 
-First, let's update our `chirps/_chirp.blade.php` file and add the `data-turbo-confirm` to the delete form:
+First, let's update our `chirps/partials/chirp.blade.php` file and add the `data-turbo-confirm` to the delete form:
 
 ```blade
 <x-turbo::frame :id="$chirp" class="block p-6">
@@ -95,8 +95,8 @@ First, we're gonna create a global modal that will be used for this kind of conf
     <body class="font-sans antialiased">
         <div class="min-h-screen bg-gray-100">
             <!-- [tl! collapse:start] -->
-            @include('layouts.navigation')
-            @include('layouts.notifications')
+            @include('layouts.partials.navigation')
+            @include('layouts.partials.notifications')
 
             <!-- Page Heading -->
             <header class="bg-white shadow turbo-native:hidden">

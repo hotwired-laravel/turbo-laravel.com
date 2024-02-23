@@ -308,8 +308,8 @@ Let's also hide the header section in the `resources/views/layouts/app.blade.php
     </head>
     <body class="font-sans antialiased">
         <div class="min-h-screen bg-gray-100">
-            @include('layouts.navigation')
-            @include('layouts.notifications')
+            @include('layouts.partials.navigation')
+            @include('layouts.partials.notifications')
 
             <!-- Page Heading -->
             <header class="bg-white shadow">
@@ -788,8 +788,8 @@ We have lost the flash message, but we'll handle that soon. One thing is botheri
     <!-- [tl! collapse:start] -->
     <body class="font-sans antialiased">
         <div class="min-h-screen bg-gray-100">
-            @include('layouts.navigation')
-            @include('layouts.notifications')
+            @include('layouts.partials.navigation')
+            @include('layouts.partials.notifications')
 
             <!-- Page Heading -->
             <header class="bg-white shadow turbo-native:hidden">
