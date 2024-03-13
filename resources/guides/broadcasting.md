@@ -400,7 +400,7 @@ networks:
         driver: bridge
 ```
 
-Now, we can boot the Soketi service by running:
+Now, we can boot the Reverb service by running:
 
 ```bash
 ./vendor/bin/sail up -d
