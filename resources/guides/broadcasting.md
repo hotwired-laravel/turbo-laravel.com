@@ -344,7 +344,7 @@ If you're following using `artisan serve`, both can be `localhost` or `127.0.0.1
 
 Next, update the `docker-compose.yml` to add the new `reverb.test` service:
 
-```yml filename="docker-compose.yml"
+```yaml filename="docker-compose.yml"
 services:
     # [tl! collapse:start]
     laravel.test:
