@@ -78,16 +78,12 @@ Route::resource('chirps', ChirpController::class) // [tl! add:start]
 
 Route::middleware('auth')->group(function () {
     // [tl! collapse:start]
-    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+    Route::prefix('profile')->as('profile.')->group(function () {
+        Route::singleton('password', ProfilePasswordController::class)->only(['edit', 'update']);
+    });
 
-    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-
-    Route::get('/profile/password/edit', [ProfilePasswordController::class, 'edit'])->name('profile.password.edit');
-    Route::patch('/profile/password', [ProfilePasswordController::class, 'update'])->name('profile.password.update');
-
-    Route::get('/profile/delete', [ProfileController::class, 'delete'])->name('profile.delete');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/delete', [ProfileController::class, 'delete'])->name('profile.delete');
+    Route::singleton('profile', ProfileController::class)->destroyable();
     // [tl! collapse:end]
 });
 
@@ -380,86 +376,13 @@ This partial is making use a Blade component that doesn't exist yet called `x-te
 <textarea {{ $disabled ? 'disabled' : '' }} {!! $attributes->merge(['class' => 'border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm']) !!}>{{ $value }}</textarea>
 ```
 
-Also, the `chirps.create` view is passing a `title` prop to the `x-app-layout` component, but the component is not expecting that yet. We need to update the `AppLayout.php` PHP class:
-
-```php filename="app/Components/AppLayout.php"
-<?php
-
-namespace App\View\Components;
-
-use Illuminate\View\Component;
-use Illuminate\View\View;
-
-class AppLayout extends Component
-{
-    public function __construct(public ?string $title = null)
-    {
-    } // [tl! add:-2,3]
-
-    /**
-     * Get the view / contents that represents the component.
-     */
-    public function render(): View
-    {
-        return view('layouts.app');
-    }
-}
-```
-
-Now, update the `layouts/app.blade.php` file to make use of the new title prop:
-
-```blade filename="resources/views/layouts/app.blade.php"
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
-
-        <title>{{ config('app.name', 'Laravel') }}</title>
-        <title>{{ $title ?? config('app.name', 'Laravel') }}</title> <!-- [tl! remove:-1,1 add] -->
-
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-
-        <!-- Styles -->
-        <link rel="stylesheet" href="{{ tailwindcss('css/app.css') }}">
-
-        <!-- Scripts -->
-        <x-importmap::tags />
-    </head>
-    <body class="font-sans antialiased">
-        <!-- [tl! collapse:start] -->
-        <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
-            @include('layouts.partials.navigation')
-
-            <!-- Page Heading -->
-            @if (isset($header))
-                <header class="bg-white dark:bg-gray-800 shadow">
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                        {{ $header }}
-                    </div>
-                </header>
-            @endif
-
-            <!-- Page Content -->
-            <main>
-                {{ $slot }}
-            </main>
-        </div>
-        <!-- [tl! collapse:end] -->
-    </body>
-</html>
-```
-
 That's it! Refresh the page in your browser to see your new form rendered in the default layout provided by Breeze!
 
-![Creating Chirps Link](/images/creating-chirps-link.png)
+![Creating Chirps Link](/images/bootcamp/creating-chirps-link.png)
 
 If you click on that link, you will see the form to create Chirps and the breadcrumbs should also have been updated:
 
-![Creating Chirps Form](/images/creating-chirps-form.png)
+![Creating Chirps Form](/images/bootcamp/creating-chirps-form.png)
 
 ### Navigation menu
 
@@ -785,7 +708,7 @@ Each database migration will only be run once. To make additional changes to a t
 
 We're now ready to send a Chirp using the form we just created! We won't be able to see the result yet because we haven't displayed existing Chirps on the page.
 
-![Saving Chirps](/images/creating-chirps-saving.png)
+![Saving Chirps](/images/bootcamp/creating-chirps-saving.png)
 
 If you leave the message field empty, or enter more than 255 characters, then you'll see the validation in action.
 
@@ -1000,6 +923,6 @@ php artisan tailwindcss:build
 
 If you create another Chirp now, you should see a nice notification message at the top:
 
-![Flash Messages](/images/creating-chirps-flash-messages.png)
+![Flash Messages](/images/bootcamp/creating-chirps-flash-messages.png)
 
 [Continue to listing Chirps...](/guides/listing-chirps)

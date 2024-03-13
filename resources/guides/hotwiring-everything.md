@@ -236,9 +236,41 @@ class ChirpController extends Controller
 }
 ```
 
+If you try to create one now, you'll notice Turbo Laravel expects to find the Chirp partial at `resources/views/chirps/_chirp.blade.php`, but we are using a folder-based partial convention. This pattern is common in Laravel, so Turbo Laravel understands that as well. Let's update the package to use that. Update your `AppServiceProvider` like so:
+
+```php
+<?php
+
+namespace App\Providers;
+
+use HotwiredLaravel\TurboLaravel\Facades\Turbo; // [tl! add]
+use Illuminate\Support\ServiceProvider;
+
+class AppServiceProvider extends ServiceProvider
+{
+    // [tl! collapse:start]
+    /**
+     * Register any application services.
+     */
+    public function register(): void
+    {
+        //
+    }
+    // [tl! collapse:end]
+    /**
+     * Bootstrap any application services.
+     */
+    public function boot(): void
+    {
+        //
+        Turbo::usePartialsSubfolderPattern(); // [tl! remove:-1,1 add]
+    }
+}
+```
+
 Now if you try creating a Chirp, you should see the newly created Chirp at the top of the chirps list, the form should have been cleared, and a flash message showed up.
 
-![Hotwiring Chirps Creationg](/images/hotwiring-creating-chirps.png)
+![Hotwiring Chirps Creationg](/images/bootcamp/hotwiring-creating-chirps.png)
 
 Let's also implement inline editing for our chirps.
 
@@ -458,7 +490,7 @@ class ChirpController extends Controller
 
 Now, if you try editing a chirp, you should see the same thing as before, but now we're sure that our chirp will just be updated no matter if it's present in the index listing of chirps or not after the form is submitted. Yay!
 
-![Hotwiring Editing Chirps](/images/hotwiring-editing-chirp.png)
+![Hotwiring Editing Chirps](/images/bootcamp/hotwiring-editing-chirp.png)
 
 ## Deleting Chirps with Turbo Streams
 
@@ -472,11 +504,14 @@ Let's change the `destroy` action in our `ChirpController` to respond with a rem
 namespace App\Http\Controllers;
 
 use App\Models\Chirp;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 // [tl! collapse:end]
 class ChirpController extends Controller
 {
     // [tl! collapse:start]
+    use AuthorizesRequests;
+
     /**
      * Display a listing of the resource.
      *
@@ -614,6 +649,7 @@ So far we've been using the default action methods provided by the Turbo Laravel
 
 namespace App\Providers;
 
+use HotwiredLaravel\TurboLaravel\Facades\Turbo;
 use Illuminate\Support\ServiceProvider;
 use Tonysm\TurboLaravel\Http\PendingTurboStreamResponse; // [tl! add]
 
@@ -638,8 +674,8 @@ class AppServiceProvider extends ServiceProvider
     // [tl! collapse:end]
     public function boot()
     {
-        //
-        PendingTurboStreamResponse::macro('notice', function ($message) { // [tl! remove:-1,1 add:0,5]
+        Turbo::usePartialsSubfolderPattern();
+        PendingTurboStreamResponse::macro('notice', function ($message) { // [tl! add:0,5]
             return turbo_stream()->append('notifications', view('layouts.partials.notice', [
                 'message' => $message,
             ]));
@@ -656,11 +692,14 @@ Now, our controllers can be cleaned up a bit:
 namespace App\Http\Controllers;
 
 use App\Models\Chirp;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 // [tl! collapse:end]
 class ChirpController extends Controller
 {
     // [tl! collapse:start]
+    use AuthorizesRequests;
+
     /**
      * Display a listing of the resource.
      *
@@ -795,6 +834,6 @@ Although this is using Macros, we're still using the Turbo Stream actions that s
 
 With these changes, our application behaves so much better than before! Try it out yourself!
 
-![Inline Editing Forms](/images/hotwiring-chirps-inline-forms.png)
+![Inline Editing Forms](/images/bootcamp/hotwiring-chirps-inline-forms.png)
 
 [Continue to Broadcasting...](/guides/broadcasting)

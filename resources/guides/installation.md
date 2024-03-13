@@ -28,13 +28,9 @@ php artisan serve
 
 Once you have started the Artisan development server, your application will be accessible in your web browser at [http://localhost:8000](http://localhost:8000).
 
-![Laravel Welcome page](/images/welcome-page.png)
+![Laravel Welcome page](/images/bootcamp/laravel-welcome.png)
 
-For simplicity, you may use SQLite to store your application's data. To instruct Laravel to use SQLite instead of MySQL, update your new application's `.env` file and remove all of the `DB_*` environment variables except for the `DB_CONNECTION` variable, which should be set to `sqlite`:
-
-```env filename=".env"
-DB_CONNECTION=sqlite
-```
+For simplicity, you may use SQLite to store your application's data.
 
 ### Installing via Docker
 
@@ -43,12 +39,12 @@ If you do not have PHP installed locally, you may develop your application using
 The easiest way to install Laravel is using Laravel's `laravel.build` service, which will download and create a fresh Laravel application for you. Launch a terminal and run the following command:
 
 ```bash
-curl -s "https://laravel.build/turbo-chirper" | bash
+curl -s "https://laravel.build/turbo-chirper?with=none" | bash
 ```
 
 Sail installation may take several minutes while Sail's application containers are built on your local machine.
 
-By default, the installer will pre-configure Laravel Sail with a number of useful services for your application, including a MySQL database server. You may [customize the Sail services](https://laravel.com/docs/installation#choosing-your-sail-services) if needed.
+Notice that we're passing the `?with=none` flag to the command. By default, the installer will pre-configure Laravel Sail with a number of useful services for your application. We don't want that. We only need the app container and we'll use SQLite, which should be the default.
 
 After the project has been created, you can navigate to the application directory and start Laravel Sail:
 
@@ -59,7 +55,7 @@ cd turbo-chirper
 ```
 
 > **note**
-> You can [create a shell alias](https://laravel.com/docs/sail#configuring-a-shell-alias) that allows you execute Sail's commands more easily.
+> You may [create a shell alias](https://laravel.com/docs/sail#configuring-a-shell-alias) that allows you execute Sail's commands more easily.
 
 When developing applications using Sail, you may execute Artisan, NPM, and Composer commands via the Sail CLI instead of invoking them directly:
 
@@ -72,7 +68,7 @@ When developing applications using Sail, you may execute Artisan, NPM, and Compo
 
 Once the application's Docker containers have been started, you can access the application in your web browser at: [http://localhost](http://localhost).
 
-![Welcome Page over Sail](/images/sail-welcome-page.png)
+![Welcome Page over Sail](/images/bootcamp/laravel-welcome-sail.png)
 
 ## Installing Turbo Breeze
 
@@ -83,7 +79,7 @@ Turbo Breeze offers two stack options: `turbo`, which comes with [Importmap Lara
 Open a new terminal in your `turbo-chirper` project directory and install your chosen stack with the given commands:
 
 ```bash
-composer require hotwired-laravel/turbo-breeze:1.0.0-beta12 --dev
+composer require hotwired-laravel/turbo-breeze:1.0.0-beta17 --dev
 
 php artisan turbo-breeze:install turbo --dark
 ```
@@ -91,23 +87,19 @@ php artisan turbo-breeze:install turbo --dark
 > **note**
 > If you're using Sail, remember to prefix this command with `./vendor/bin/sail`, since the symlink needs to be created inside the container.
 
-Turbo Breeze will install and configure your front-end dependencies for you. It should have built the initial version of our assets for us, so all we got to do now is migrate the database:
-
-```bash
-php artisan migrate
-```
+Turbo Breeze will install and configure your front-end dependencies for you. It should have built the initial version of our assets for us.
 
 The welcome page should now have the Login and Register links at the top:
 
-![Welcome with Auth](/images/install-welcome-auth.png)
+![Welcome with Auth](/images/bootcamp/install-welcome-auth.png)
 
 And you should be able to head to the `/register` route and create your own account:
 
-![Register Page](/images/install-register.png)
+![Register Page](/images/bootcamp/install-register.png)
 
 Then, you should be redirected to the Dashboard page:
 
-![Dashboard Page](/images/install-dashboard.png)
+![Dashboard Page](/images/bootcamp/install-dashboard.png)
 
 This Dashboard page is protected by Laravel's auth middleware, so only authenticated users can access it. The registration process automatically authenticates us.
 
@@ -115,7 +107,7 @@ Turbo Breeze is a fork of Laravel Breeze, but customized to work better in a Hot
 
 There are a couple differences between Turbo Breeze and Larave Breeze. In Laravel Breeze, your name at the top of the navigation bar is a dropdown. In Turbo Breeze, it's a link to a page with the menu:
 
-![Profile Menu](/images/profile-menu.png)
+![Profile Menu](/images/bootcamp/profile-menu.png)
 
 In Laravel Breeze, all the profile forms are rendered in the same page. In Turbo Breeze, each one has its own dedicated page. That's not a requirement for Hotwired apps, but it works best in a mobile context. We'll see more about that later in this bootcamp.
 

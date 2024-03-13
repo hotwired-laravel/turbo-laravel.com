@@ -44,16 +44,12 @@ Route::resource('chirps', ChirpController::class)
     ->middleware(['auth', 'verified']);
 // [tl! collapse:start]
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+    Route::prefix('profile')->as('profile.')->group(function () {
+        Route::singleton('password', ProfilePasswordController::class)->only(['edit', 'update']);
+    });
 
-    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-
-    Route::get('/profile/password/edit', [ProfilePasswordController::class, 'edit'])->name('profile.password.edit');
-    Route::patch('/profile/password', [ProfilePasswordController::class, 'update'])->name('profile.password.update');
-
-    Route::get('/profile/delete', [ProfileController::class, 'delete'])->name('profile.delete');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/delete', [ProfileController::class, 'delete'])->name('profile.delete');
+    Route::singleton('profile', ProfileController::class)->destroyable();
 });
 
 require __DIR__.'/auth.php'; // [tl! collapse:end]
@@ -80,11 +76,14 @@ Now we can update the `destroy` action on our `ChirpController` class to perform
 namespace App\Http\Controllers;
 
 use App\Models\Chirp;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 // [tl! collapse:end]
 class ChirpController extends Controller
 {
     // [tl! collapse:start]
+    use AuthorizesRequests;
+
     /**
      * Display a listing of the resource.
      *
@@ -350,6 +349,6 @@ Finally, we can add a delete button to the dropdown menu we created earlier in o
 
 If you Chirped anything you weren't happy with, try deleting it!
 
-![Deleting Chirps](/images/deleting-chirps.png)
+![Deleting Chirps](/images/bootcamp/deleting-chirps.png)
 
 [Continue to Hotwiring everything...](/guides/hotwiring-everything)

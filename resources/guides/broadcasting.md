@@ -6,493 +6,69 @@
 
 We can send the same Turbo Streams we're returning to our users after a form submission over WebSockets and update the page for all users visiting it! Broadcasts may be triggered automatically whenever a [model updates](https://laravel.com/docs/eloquent#events) or manually whenever you want to broadcast it.
 
-## Setting Up Soketi
+## Setting Up Reverb
 
-Let's setup [Soketi](https://docs.soketi.app/) to handle our WebSockets connections locally. In production, we can either [deploy Soketi to Forge](https://blog.laravel.com/deploying-soketi-to-laravel-forge) or use a dedicated external service such as [Pusher](https://pusher.com/).
+Let's setup [Reverb](https://laravel.com/docs/11.x/reverb) to handle our WebSockets connections.
 
-### Quick Installation
-
-For our quick install, we're gonna follow the local CLI installation from [Soketi's docs](https://docs.soketi.app/getting-started/installation/cli-installation).
-
-If you're on Linux, make sure you install these dependencies:
+First, run the `install:broadcasting` Artisan command:
 
 ```bash
-sudo apt install -y git python3 gcc build-essential
+php artisan install:broadcasting
 ```
 
-Next, install Soketi via NPM:
+When it asks if you want to install the Node dependencies, say "No". After that, we'll install them manually with importamps:
 
 ```bash
-npm install -g @soketi/soketi
+php artisan importmap:pin laravel-echo pusher-js current.js
 ```
 
-Now, all we have to do is start the Soketi service:
+Next, we'll need to update the published `echo.js` file. It currently uses `import.meta.env.*`, which requires a build step. Instead, we'll update it to use the `current.js` to read the configs from meta tags we'll add to our layouts. But first, replace the `echo.js` with the following version:
 
-```bash
-soketi start
+```js filename="resources/js/echo.js"
+import Echo from 'laravel-echo';
+
+import Pusher from 'pusher-js';
+window.Pusher = Pusher;
+
+import { Current } from 'current.js';
+window.Current = Current;
+
+window.Echo = new Echo({
+    broadcaster: 'reverb',
+    key: Current.reverb.appKey,
+    wsHost: Current.reverb.host,
+    wsPort: Current.reverb.port ?? 80,
+    wssPort: Current.reverb.port ?? 443,
+    forceTLS: (Current.reverb.scheme ?? 'https') === 'https',
+    enabledTransports: ['ws', 'wss'],
+});
 ```
 
-This will start the Soketi server at `127.0.0.1:6001`. Your `.env` file should look like this:
+We also need to update the `bootstrap.js` file to fix the import that was appended by Reverb to the Importmap style:
 
-```env filename=".env"
-# [tl! collapse:start]
-APP_NAME=Laravel
-APP_ENV=local
-APP_KEY=[REDACTED]
-APP_DEBUG=true
-APP_URL=http://localhost
+```js filename="resources/js/bootstrap.js"
+// ...
 
-LOG_CHANNEL=stack
-LOG_DEPRECATIONS_CHANNEL=null
-LOG_LEVEL=debug
+/**
+ * Echo exposes an expressive API for subscribing to channels and listening
+ * for events that are broadcast by Laravel. Echo and event broadcasting
+ * allow your team to quickly build robust real-time web applications.
+ */
 
-DB_CONNECTION=mysql
-DB_HOST=mysql
-DB_PORT=3306
-DB_DATABASE=turbo_chirper
-DB_USERNAME=sail
-DB_PASSWORD=password
-
-BROADCAST_DRIVER=pusher
-CACHE_DRIVER=file
-FILESYSTEM_DISK=local
-QUEUE_CONNECTION=database
-SESSION_DRIVER=file
-SESSION_LIFETIME=120
-
-MEMCACHED_HOST=memcached
-
-REDIS_HOST=redis
-REDIS_PASSWORD=null
-REDIS_PORT=6379
-
-MAIL_MAILER=smtp
-MAIL_HOST=mailhog
-MAIL_PORT=1025
-MAIL_USERNAME=null
-MAIL_PASSWORD=null
-MAIL_ENCRYPTION=null
-MAIL_FROM_ADDRESS="hello@example.com"
-MAIL_FROM_NAME="${APP_NAME}"
-
-AWS_ACCESS_KEY_ID=
-AWS_SECRET_ACCESS_KEY=
-AWS_DEFAULT_REGION=us-east-1
-AWS_BUCKET=
-AWS_USE_PATH_STYLE_ENDPOINT=false
-# [tl! collapse:end]
-PUSHER_APP_ID="app-id"
-PUSHER_APP_KEY="app-key"
-PUSHER_APP_SECRET="app-secret"
-PUSHER_HOST="localhost"
-PUSHER_PORT=6001
-PUSHER_SCHEME=http
-PUSHER_APP_CLUSTER=mt1
-
-PUSHER_FRONTEND_HOST="${PUSHER_HOST}"
-PUSHER_FRONTEND_CLUSTER="${PUSHER_APP_CLUSTER}"
+import './echo';
+import 'echo'; // [tl! remove:-1,1 add]
 ```
 
-That's it for setting up Soketi locally.
+Next, let's create a new layout partial at `resources/views/layouts/partials/reverb.blade.php` with the following content:
 
-### Installing via Docker
-
-When using Laravel Sail, we can setup a Soketi service by running `php artisan sail:add soketi`:
-
-```bash
-php artisan sail:add soketi
+```blade filename="resources/views/layouts/partials/reverb.blade.php"
+<meta name="current-reverb-app-key" content="{{ config('broadcasting.connections.reverb.key') }}" />
+<meta name="current-reverb-host" content="{{ config('reverb.servers.reverb.frontend.host') }}" />
+<meta name="current-reverb-port" content="{{ config('reverb.servers.reverb.frontend.port') }}" />
+<meta name="current-reverb-scheme" content="{{ config('reverb.servers.reverb.frontend.scheme') }}" />
 ```
 
-Before booting the new service, make sure your `.env` file looks like this:
-
-```env filename=".env"
-# [tl! collapse:start]
-APP_NAME=Laravel
-APP_ENV=local
-APP_KEY=[REDACTED]
-APP_DEBUG=true
-APP_URL=http://localhost
-
-LOG_CHANNEL=stack
-LOG_DEPRECATIONS_CHANNEL=null
-LOG_LEVEL=debug
-
-DB_CONNECTION=mysql
-DB_HOST=mysql
-DB_PORT=3306
-DB_DATABASE=turbo_chirper
-DB_USERNAME=sail
-DB_PASSWORD=password
-
-BROADCAST_DRIVER=pusher
-CACHE_DRIVER=file
-FILESYSTEM_DISK=local
-QUEUE_CONNECTION=database
-SESSION_DRIVER=file
-SESSION_LIFETIME=120
-
-MEMCACHED_HOST=memcached
-
-REDIS_HOST=redis
-REDIS_PASSWORD=null
-REDIS_PORT=6379
-
-MAIL_MAILER=smtp
-MAIL_HOST=mailhog
-MAIL_PORT=1025
-MAIL_USERNAME=null
-MAIL_PASSWORD=null
-MAIL_ENCRYPTION=null
-MAIL_FROM_ADDRESS="hello@example.com"
-MAIL_FROM_NAME="${APP_NAME}"
-
-AWS_ACCESS_KEY_ID=
-AWS_SECRET_ACCESS_KEY=
-AWS_DEFAULT_REGION=us-east-1
-AWS_BUCKET=
-AWS_USE_PATH_STYLE_ENDPOINT=false
-# [tl! collapse:end]
-PUSHER_APP_ID=app-id
-PUSHER_APP_KEY=app-key
-PUSHER_APP_SECRET=app-secret
-PUSHER_HOST=soketi
-PUSHER_PORT=6001
-PUSHER_SCHEME=http
-PUSHER_APP_CLUSTER=mt1
-
-PUSHER_FRONTEND_HOST="localhost"
-PUSHER_FRONTEND_CLUSTER="${PUSHER_APP_CLUSTER}"
-```
-
-Since containers run in isolation, we'll need two different hosts. Our backend will connect using the Docker Compose service name as the host, since Docker Compose will ensure both containers are running in the same network. That's why we're setting `PUSHER_HOST` to `soketi`.
-
-However, our browser also needs to connect to the Soketi service. We're binding the Soketi container to our local port `6001`, so our browser can connect o `localhost:6001`. That's why we're setting `PUSHER_FRONTEND_HOST` to `localhost`.
-
-Now, we can boot the Soketi service by running:
-
-```bash
-./vendor/bin/sail up -d
-```
-
-That's it!
-
-## Setting Up The Broadcasting Component
-
-We're gonna split this part into two parts: the backend and the frontend.
-
-### The Backend
-
-Install the Composer dependencies:
-
-```bash
-composer require pusher/pusher-php-server
-```
-
-Now, update the `config/broadcasting.php`:
-
-```php filename="config/broadcasting.php"
-<?php
-
-return [
-    // [tl! collapse:start]
-    /*
-    |--------------------------------------------------------------------------
-    | Default Broadcaster
-    |--------------------------------------------------------------------------
-    |
-    | This option controls the default broadcaster that will be used by the
-    | framework when an event needs to be broadcast. You may set this to
-    | any of the connections defined in the "connections" array below.
-    |
-    | Supported: "pusher", "ably", "redis", "log", "null"
-    |
-    */
-    // [tl! collapse:end]
-    'default' => env('BROADCAST_DRIVER', 'null'),
-    // [tl! collapse:start]
-    /*
-    |--------------------------------------------------------------------------
-    | Broadcast Connections
-    |--------------------------------------------------------------------------
-    |
-    | Here you may define all of the broadcast connections that will be used
-    | to broadcast events to other systems or over websockets. Samples of
-    | each available type of connection are provided inside this array.
-    |
-    */
-    // [tl! collapse:end]
-    'connections' => [
-
-        'pusher' => [
-            'driver' => 'pusher',
-            'key' => env('PUSHER_APP_KEY'),
-            'secret' => env('PUSHER_APP_SECRET'),
-            'app_id' => env('PUSHER_APP_ID'),
-            'options' => [
-                'host' => env('PUSHER_HOST') ?: 'api-'.env('PUSHER_APP_CLUSTER', 'mt1').'.pusher.com',
-                'port' => env('PUSHER_PORT', 443),
-                'scheme' => env('PUSHER_SCHEME', 'https'),
-                'encrypted' => false,
-                'useTLS' => env('PUSHER_SCHEME', 'https') === 'https',
-            ],
-            'client_options' => [
-                // Guzzle client options: https://docs.guzzlephp.org/en/stable/request-options.html
-            ],
-            'frontend_options' => [ // [tl! add:start]
-                'host' => env('PUSHER_FRONTEND_HOST', env('PUSHER_HOST') ?: 'api-'.env('PUSHER_APP_CLUSTER', 'mt1').'.pusher.com'),
-                'port' => env('PUSHER_FRONTEND_PORT', env('PUSHER_PORT', 443)),
-                'cluster' => env('PUSHER_APP_CLUSTER', 'mt1'),
-                'forceTLS' => env('PUSHER_SCHEME', 'https') === 'https',
-            ], // [tl! add:end]
-        ],
-        // [tl! collapse:start]
-        'ably' => [
-            'driver' => 'ably',
-            'key' => env('ABLY_KEY'),
-        ],
-
-        'redis' => [
-            'driver' => 'redis',
-            'connection' => 'default',
-        ],
-
-        'log' => [
-            'driver' => 'log',
-        ],
-
-        'null' => [
-            'driver' => 'null',
-        ],
-        // [tl! collapse:end]
-    ],
-
-];
-```
-
-Then, uncommend the `BroadcastsServiceProvider` from the list of providers in `config/app.php`:
-
-```php filename="config/app.php"
-<?php
-
-use Illuminate\Support\Facades\Facade;
-
-return [
-    // [tl! collapse:start]
-    /*
-    |--------------------------------------------------------------------------
-    | Application Name
-    |--------------------------------------------------------------------------
-    |
-    | This value is the name of your application. This value is used when the
-    | framework needs to place the application's name in a notification or
-    | any other location as required by the application or its packages.
-    |
-    */
-
-    'name' => env('APP_NAME', 'Laravel'),
-
-    /*
-    |--------------------------------------------------------------------------
-    | Application Environment
-    |--------------------------------------------------------------------------
-    |
-    | This value determines the "environment" your application is currently
-    | running in. This may determine how you prefer to configure various
-    | services the application utilizes. Set this in your ".env" file.
-    |
-    */
-
-    'env' => env('APP_ENV', 'production'),
-
-    /*
-    |--------------------------------------------------------------------------
-    | Application Debug Mode
-    |--------------------------------------------------------------------------
-    |
-    | When your application is in debug mode, detailed error messages with
-    | stack traces will be shown on every error that occurs within your
-    | application. If disabled, a simple generic error page is shown.
-    |
-    */
-
-    'debug' => (bool) env('APP_DEBUG', false),
-
-    /*
-    |--------------------------------------------------------------------------
-    | Application URL
-    |--------------------------------------------------------------------------
-    |
-    | This URL is used by the console to properly generate URLs when using
-    | the Artisan command line tool. You should set this to the root of
-    | your application so that it is used when running Artisan tasks.
-    |
-    */
-
-    'url' => env('APP_URL', 'http://localhost'),
-
-    'asset_url' => env('ASSET_URL'),
-
-    /*
-    |--------------------------------------------------------------------------
-    | Application Timezone
-    |--------------------------------------------------------------------------
-    |
-    | Here you may specify the default timezone for your application, which
-    | will be used by the PHP date and date-time functions. We have gone
-    | ahead and set this to a sensible default for you out of the box.
-    |
-    */
-
-    'timezone' => 'UTC',
-
-    /*
-    |--------------------------------------------------------------------------
-    | Application Locale Configuration
-    |--------------------------------------------------------------------------
-    |
-    | The application locale determines the default locale that will be used
-    | by the translation service provider. You are free to set this value
-    | to any of the locales which will be supported by the application.
-    |
-    */
-
-    'locale' => 'en',
-
-    /*
-    |--------------------------------------------------------------------------
-    | Application Fallback Locale
-    |--------------------------------------------------------------------------
-    |
-    | The fallback locale determines the locale to use when the current one
-    | is not available. You may change the value to correspond to any of
-    | the language folders that are provided through your application.
-    |
-    */
-
-    'fallback_locale' => 'en',
-
-    /*
-    |--------------------------------------------------------------------------
-    | Faker Locale
-    |--------------------------------------------------------------------------
-    |
-    | This locale will be used by the Faker PHP library when generating fake
-    | data for your database seeds. For example, this will be used to get
-    | localized telephone numbers, street address information and more.
-    |
-    */
-
-    'faker_locale' => 'en_US',
-
-    /*
-    |--------------------------------------------------------------------------
-    | Encryption Key
-    |--------------------------------------------------------------------------
-    |
-    | This key is used by the Illuminate encrypter service and should be set
-    | to a random, 32 character string, otherwise these encrypted strings
-    | will not be safe. Please do this before deploying an application!
-    |
-    */
-
-    'key' => env('APP_KEY'),
-
-    'cipher' => 'AES-256-CBC',
-
-    /*
-    |--------------------------------------------------------------------------
-    | Maintenance Mode Driver
-    |--------------------------------------------------------------------------
-    |
-    | These configuration options determine the driver used to determine and
-    | manage Laravel's "maintenance mode" status. The "cache" driver will
-    | allow maintenance mode to be controlled across multiple machines.
-    |
-    | Supported drivers: "file", "cache"
-    |
-    */
-
-    'maintenance' => [
-        'driver' => 'file',
-        // 'store'  => 'redis',
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Autoloaded Service Providers
-    |--------------------------------------------------------------------------
-    |
-    | The service providers listed here will be automatically loaded on the
-    | request to your application. Feel free to add your own services to
-    | this array to grant expanded functionality to your applications.
-    |
-    */
-    // [tl! collapse:end]
-    'providers' => [
-        // [tl! collapse:start]
-        /*
-         * Laravel Framework Service Providers...
-         */
-        Illuminate\Auth\AuthServiceProvider::class,
-        Illuminate\Broadcasting\BroadcastServiceProvider::class,
-        Illuminate\Bus\BusServiceProvider::class,
-        Illuminate\Cache\CacheServiceProvider::class,
-        Illuminate\Foundation\Providers\ConsoleSupportServiceProvider::class,
-        Illuminate\Cookie\CookieServiceProvider::class,
-        Illuminate\Database\DatabaseServiceProvider::class,
-        Illuminate\Encryption\EncryptionServiceProvider::class,
-        Illuminate\Filesystem\FilesystemServiceProvider::class,
-        Illuminate\Foundation\Providers\FoundationServiceProvider::class,
-        Illuminate\Hashing\HashServiceProvider::class,
-        Illuminate\Mail\MailServiceProvider::class,
-        Illuminate\Notifications\NotificationServiceProvider::class,
-        Illuminate\Pagination\PaginationServiceProvider::class,
-        Illuminate\Pipeline\PipelineServiceProvider::class,
-        Illuminate\Queue\QueueServiceProvider::class,
-        Illuminate\Redis\RedisServiceProvider::class,
-        Illuminate\Auth\Passwords\PasswordResetServiceProvider::class,
-        Illuminate\Session\SessionServiceProvider::class,
-        Illuminate\Translation\TranslationServiceProvider::class,
-        Illuminate\Validation\ValidationServiceProvider::class,
-        Illuminate\View\ViewServiceProvider::class,
-
-        /*
-         * Package Service Providers...
-         */
-        // [tl! collapse:end]
-        /*
-         * Application Service Providers...
-         */
-        App\Providers\AppServiceProvider::class,
-        App\Providers\AuthServiceProvider::class,
-        // App\Providers\BroadcastServiceProvider::class,
-        App\Providers\BroadcastServiceProvider::class, // [tl! remove:-1,1 add]
-        App\Providers\EventServiceProvider::class,
-        App\Providers\RouteServiceProvider::class,
-
-    ],
-    // [tl! collapse:start]
-    /*
-    |--------------------------------------------------------------------------
-    | Class Aliases
-    |--------------------------------------------------------------------------
-    |
-    | This array of class aliases will be registered when this application
-    | is started. However, feel free to register as many as you wish as
-    | the aliases are "lazy" loaded so they don't hinder performance.
-    |
-    */
-
-    'aliases' => Facade::defaultAliases()->merge([
-        // 'ExampleClass' => App\Example\ExampleClass::class,
-    ])->toArray(),
-    // [tl! collapse:end]
-];
-```
-
-Now, since we're using Importmap Laravel, we need to expose the JS Pusher keys to our frontend somehow (in a Vite setup we could reach for them using `import.meta.VITE_*`, but we don't have a build compilation step here.)
-
-For that reason, we're gonna add some meta tags to our `app.blade.php` and `guest.blade.php` layouts that will expose those configs for our JS frontend:
+Then, add that to the `app.blade.php` layout file:
 
 ```blade filename="resources/views/layouts/app.blade.php"
 <!DOCTYPE html>
@@ -501,28 +77,34 @@ For that reason, we're gonna add some meta tags to our `app.blade.php` and `gues
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
-        <!-- [tl! add:1,1] -->
-        @include('layouts.current-meta')
-
+        @if ($viewTransitions ?? false)
+        <meta name="view-transition" content="same-origin" />
+        @endif
+        @include('layouts.partials.reverb')
+        {{ $meta ?? '' }}
+        <!-- [tl! add:-2,1 collapse:end] -->
         <title>{{ config('app.name', 'Laravel') }}</title>
-        <!-- [tl! collapse:start] -->
+
         <!-- Fonts -->
-        <link rel="stylesheet" href="https://fonts.bunny.net/css2?family=Nunito:wght@400;600;700&display=swap">
+        <link rel="preconnect" href="https://fonts.bunny.net">
+        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+
+        <!-- Styles -->
+        <link rel="stylesheet" href="{{ tailwindcss('css/app.css') }}">
 
         <!-- Scripts -->
         <x-importmap::tags />
-        <link rel="stylesheet" href="{{ tailwindcss('css/app.css') }}">
         <!-- [tl! collapse:end] -->
     </head>
+    <!-- [tl! collapse:start] -->
     <body class="font-sans antialiased">
-        <!-- [tl! collapse:start] -->
-        <div class="min-h-screen bg-gray-100">
+        <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
             @include('layouts.partials.navigation')
             @include('layouts.partials.notifications')
 
             <!-- Page Heading -->
             @if (isset($header))
-                <header class="bg-white shadow">
+                <header class="bg-white dark:bg-gray-800 shadow">
                     <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                         {{ $header }}
                     </div>
@@ -534,12 +116,12 @@ For that reason, we're gonna add some meta tags to our `app.blade.php` and `gues
                 {{ $slot }}
             </main>
         </div>
-        <!-- [tl! collapse:end] -->
     </body>
+    <!-- [tl! collapse:end] -->
 </html>
 ```
 
-And also update the `guest` layout:
+Then, do the same for the guest layout:
 
 ```blade filename="resources/views/layouts/guest.blade.php"
 <!DOCTYPE html>
@@ -548,170 +130,283 @@ And also update the `guest` layout:
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
-        <!-- [tl! add:1,1] -->
-        @include('layouts.current-meta')
+        @if ($viewTransitions ?? false)
+        <meta name="view-transition" content="same-origin" />
+        @endif
+        @include('layouts.partials.reverb')
+        {{ $meta ?? '' }}
+        <!-- [tl! add:-2,1 collapse:start] -->
 
         <title>{{ config('app.name', 'Laravel') }}</title>
-        <!-- [tl! collapse:start] -->
+
         <!-- Fonts -->
-        <link rel="stylesheet" href="https://fonts.bunny.net/css2?family=Nunito:wght@400;600;700&display=swap">
+        <link rel="preconnect" href="https://fonts.bunny.net">
+        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+
+        <!-- Styles -->
+        <link rel="stylesheet" href="{{ tailwindcss('css/app.css') }}">
 
         <!-- Scripts -->
         <x-importmap::tags />
-        <link rel="stylesheet" href="{{ tailwindcss('css/app.css') }}">
         <!-- [tl! collapse:end] -->
     </head>
-    <body>
-        <!-- [tl! collapse:start] -->
-        <div class="font-sans text-gray-900 antialiased">
-            {{ $slot }}
+    <!-- [tl! collapse:start] -->
+    <body class="font-sans text-gray-900 antialiased">
+        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100 dark:bg-gray-900">
+            <div>
+                <a href="/">
+                    <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
+                </a>
+            </div>
+
+            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white dark:bg-gray-800 shadow-md overflow-hidden sm:rounded-lg">
+                {{ $slot }}
+            </div>
         </div>
-        <!-- [tl! collapse:end] -->
     </body>
+    <!-- [tl! collapse:end] -->
 </html>
 ```
 
-Let's create the `layouts/current-meta.blade.php` partial:
+Then, we need to tweak our `.env` file to look something like this:
 
-```blade filename="resources/views/layouts/current-meta.blade.php"
-{{-- Pusher Client-Side Config --}}
-<meta name="current-pusher-key" content="{{ config('broadcasting.connections.pusher.key') }}" />
-<meta name="current-pusher-cluster" content="{{ config('broadcasting.connections.pusher.frontend_options.cluster') }}" />
-<meta name="current-pusher-wsHost" content="{{ config('broadcasting.connections.pusher.frontend_options.host') }}" />
-<meta name="current-pusher-wsPort" content="{{ config('broadcasting.connections.pusher.frontend_options.port') }}" />
-<meta name="current-pusher-forceTLS" content="{{ json_encode(boolval(config('broadcasting.connections.pusher.frontend_options.forceTLS'))) }}" />
+```env
+# [tl! collapse:start]
+APP_NAME=Laravel
+APP_ENV=local
+APP_KEY=[REDACTED]
+APP_DEBUG=true
+APP_TIMEZONE=UTC
+APP_URL=http://localhost
+
+APP_LOCALE=en
+APP_FALLBACK_LOCALE=en
+APP_FAKER_LOCALE=en_US
+
+APP_MAINTENANCE_DRIVER=file
+APP_MAINTENANCE_STORE=database
+
+BCRYPT_ROUNDS=12
+
+LOG_CHANNEL=stack
+LOG_STACK=single
+LOG_DEPRECATIONS_CHANNEL=null
+LOG_LEVEL=debug
+
+DB_CONNECTION=sqlite
+# DB_HOST=127.0.0.1
+# DB_PORT=3306
+# DB_DATABASE=turbo_chirper_l11
+# DB_USERNAME=sail
+# DB_PASSWORD=password
+
+SESSION_DRIVER=database
+SESSION_LIFETIME=120
+SESSION_ENCRYPT=false
+SESSION_PATH=/
+SESSION_DOMAIN=null
+
+BROADCAST_CONNECTION=reverb
+FILESYSTEM_DISK=local
+QUEUE_CONNECTION=database
+
+CACHE_STORE=database
+CACHE_PREFIX=
+
+MEMCACHED_HOST=127.0.0.1
+
+REDIS_CLIENT=phpredis
+REDIS_HOST=127.0.0.1
+REDIS_PASSWORD=null
+REDIS_PORT=6379
+
+MAIL_MAILER=log
+MAIL_HOST=127.0.0.1
+MAIL_PORT=2525
+MAIL_USERNAME=null
+MAIL_PASSWORD=null
+MAIL_ENCRYPTION=null
+MAIL_FROM_ADDRESS="hello@example.com"
+MAIL_FROM_NAME="${APP_NAME}"
+
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+AWS_DEFAULT_REGION=us-east-1
+AWS_BUCKET=
+AWS_USE_PATH_STYLE_ENDPOINT=false
+# [tl! collapse:end]
+REVERB_APP_ID=[REDACTED]
+REVERB_APP_KEY=[REDACTED]
+REVERB_APP_SECRET=[REDACTED]
+REVERB_HOST="reverb.test"
+REVERB_PORT=8080
+REVERB_SCHEME=http
+
+REVERB_FRONTEND_HOST="localhost"
+REVERB_FRONTEND_PORT="${REVERB_PORT}"
+REVERB_FRONTEND_SCHEME="${REVERB_SCHEME}"
 ```
 
-Note that all our meta tags are exposed using the `current-pusher-*` prefix. That's gonna be important.
+With that, our Reverb config needs to be updated to use the new frontend configs:
 
-### The Frontend
+```php filename="config/reverb.php"
+<?php
 
-Before we set up Laravel Echo, let's install the JS dependencies:
+return [
+    // [tl! collapse:start]
+    /*
+    |--------------------------------------------------------------------------
+    | Default Reverb Server
+    |--------------------------------------------------------------------------
+    |
+    | This option controls the default server used by Reverb to handle
+    | incoming messages as well as braodcasting message to all your
+    | connected clients. At this time only "reverb" is supported.
+    |
+    */
+
+    'default' => env('REVERB_SERVER', 'reverb'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Reverb Servers
+    |--------------------------------------------------------------------------
+    |
+    | Here you may define details for each of the supported Reverb servers.
+    | Each server has its own configuration options that are defined in
+    | the array below. You should ensure all the options are present.
+    |
+    */
+    // [tl! collapse:end]
+    'servers' => [
+
+        'reverb' => [
+            'host' => env('REVERB_SERVER_HOST', '0.0.0.0'),
+            'port' => env('REVERB_SERVER_PORT', 8080),
+            'hostname' => env('REVERB_HOST'),
+            'options' => [
+                'tls' => [],
+            ],
+            'scaling' => [
+                'enabled' => env('REVERB_SCALING_ENABLED', false),
+                'channel' => env('REVERB_SCALING_CHANNEL', 'reverb'),
+            ],
+            'frontend' => [ // [tl! add:start]
+                'host' => env('REVERB_FRONTEND_HOST'),
+                'port' => env('REVERB_FRONTEND_PORT'),
+                'scheme' => env('REVERB_FRONTEND_SCHEME'),
+            ], // [tl! add:end]
+            'pulse_ingest_interval' => env('REVERB_PULSE_INGEST_INTERVAL', 15),
+        ],
+
+    ],
+    // [tl! collapse:start]
+    /*
+    |--------------------------------------------------------------------------
+    | Reverb Applications
+    |--------------------------------------------------------------------------
+    |
+    | Here you may define how Reverb applications are managed. If you choose
+    | to use the "config" provider, you may define an array of apps which
+    | your server will support, including their connection credentials.
+    |
+    */
+
+    'apps' => [
+
+        'provider' => 'config',
+
+        'apps' => [
+            [
+                'key' => env('REVERB_APP_KEY'),
+                'secret' => env('REVERB_APP_SECRET'),
+                'app_id' => env('REVERB_APP_ID'),
+                'options' => [
+                    'host' => env('REVERB_HOST'),
+                    'port' => env('REVERB_PORT', 443),
+                    'scheme' => env('REVERB_SCHEME', 'https'),
+                    'useTLS' => env('REVERB_SCHEME', 'https') === 'https',
+                ],
+                'allowed_origins' => ['*'],
+                'ping_interval' => env('REVERB_APP_PING_INTERVAL', 60),
+                'max_message_size' => env('REVERB_APP_MAX_MESSAGE_SIZE', 10000),
+            ],
+        ],
+
+    ],
+    // [tl! collapse:end]
+];
+```
+
+The Broadcasting component has two sides: the backend and the frontend. The backend needs to connect to the Reverb server, and since we're using Sail, we'll spin up a new container for that. For this reason, we cannot use the same host as the frontend, since that's what the browser will use to connect to the server. The backend will connect to a host named `reverb.test:8080` (we'll add it next), and the browser will connect to `localhost:8080`.
+
+If you're following using `artisan serve`, both can be `localhost` or `127.0.0.1`.
+
+Next, update the `docker-compose.yml` to add the new `reverb.test` service:
+
+```yml filename="docker-compose.yml"
+services:
+    # [tl! collapse:start]
+    laravel.test:
+        build:
+            context: ./vendor/laravel/sail/runtimes/8.3
+            dockerfile: Dockerfile
+            args:
+                WWWGROUP: '${WWWGROUP}'
+        image: sail-8.3/app
+        extra_hosts:
+            - 'host.docker.internal:host-gateway'
+        ports:
+            - '${APP_PORT:-80}:80'
+            - '${VITE_PORT:-5173}:${VITE_PORT:-5173}'
+        environment:
+            WWWUSER: '${WWWUSER}'
+            LARAVEL_SAIL: 1
+            XDEBUG_MODE: '${SAIL_XDEBUG_MODE:-off}'
+            XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}'
+            IGNITION_LOCAL_SITES_PATH: '${PWD}'
+        volumes:
+            - '.:/var/www/html'
+        networks:
+            - sail
+        depends_on: {  }
+    # [tl! collapse:end]
+    reverb.test: # [tl! add:start]
+        build:
+            context: ./vendor/laravel/sail/runtimes/8.3
+            dockerfile: Dockerfile
+            args:
+                WWWGROUP: '${WWWGROUP}'
+        image: sail-8.3/app
+        command: ["php", "artisan", "reverb:start"]
+        extra_hosts:
+            - 'host.docker.internal:host-gateway'
+        ports:
+            - '${REVERB_PORT:-8080}:8080'
+        environment:
+            WWWUSER: '${WWWUSER}'
+            LARAVEL_SAIL: 1
+            XDEBUG_MODE: '${SAIL_XDEBUG_MODE:-off}'
+            XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}'
+            IGNITION_LOCAL_SITES_PATH: '${PWD}'
+        volumes:
+            - '.:/var/www/html'
+        networks:
+            - sail
+        depends_on:
+            - laravel.test # [tl! add:end]
+networks:
+    sail:
+        driver: bridge
+```
+
+Now, we can boot the Soketi service by running:
 
 ```bash
-php artisan importmap:pin laravel-echo pusher-js current.js
+./vendor/bin/sail up -d
 ```
 
-Now, let's configure Laravel Echo. Uncomment the Laravel Echo settings in our `bootstrap.js`:
-
-```js filename="resources/js/bootstrap.js"
-// [tl! collapse:start]
-import _ from 'lodash';
-window._ = _;
-
-/**
- * We'll load the axios HTTP library which allows us to easily issue requests
- * to our Laravel back-end. This library automatically handles sending the
- * CSRF token as a header based on the value of the "XSRF" token cookie.
- */
-
-import axios from 'axios';
-window.axios = axios;
-
-window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
-
-/**
- * Echo exposes an expressive API for subscribing to channels and listening
- * for events that are broadcast by Laravel. Echo and event broadcasting
- * allows your team to easily build robust real-time web applications.
- */
-// [tl! collapse:end]
-import Echo from 'laravel-echo';
-
-import Pusher from 'pusher-js';
-window.Pusher = Pusher;
-
-window.Echo = new Echo({
-    broadcaster: 'pusher',
-    key: import.meta.env.VITE_PUSHER_APP_KEY,
-    cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER ?? 'mt1',
-    wsHost: import.meta.env.VITE_PUSHER_HOST ? import.meta.env.VITE_PUSHER_HOST : `ws-${import.meta.env.VITE_PUSHER_APP_CLUSTER}.pusher.com`,
-    wsPort: import.meta.env.VITE_PUSHER_PORT ?? 80,
-    wssPort: import.meta.env.VITE_PUSHER_PORT ?? 443,
-    forceTLS: (import.meta.env.VITE_PUSHER_SCHEME ?? 'https') === 'https',
-    enabledTransports: ['ws', 'wss'],
-});
-```
-
-This file was written assuming we were using Vite, but we're not. Since we're using Importmap Laravel, we don't have access to a build step, which is how Vite replaces these `import.meta.env.*` with the values from your `.env` file.
-
-Remember that we're exposing some meta tags in our HTML document head, so we're going to configure Laravel Echo using those meta tags.
-
-We could reach for them individually using something like:
-
-```js
-document.head.querySelector('meta[name=current-pusher-key]').content
-```
-
-But instead we're gonna use [current.js](https://www.npmjs.com/package/current.js), which is inpired by what the 37signals folks are using on Hey. This lib defines a JavaScript Proxy object that searches for the accessed properties in the HTML document's meta tags.
-
-For instance, if we had the following meta tags:
-
-```html
-<meta name="current-identity-id" content="123">
-<meta name="current-identity-time-zone-name" content="Central Time (US & Canada)">
-```
-
-We could reach for it from JavaScript using `current.js` like so:
-
-```js
-import { Current } from "current.js"
-
-Current.identity
-// => { id: "123", timeZoneName: "Central Time (US & Canada)" }
-```
-
-Let's update our bootstrap.js to make use of `current.js` instead of relying on build-time keys using `import.meta.env.*`:
-
-```js filename="resources/js/bootstrap.js"
-// [tl! collapse:start]
-import _ from 'lodash';
-window._ = _;
-
-/**
- * We'll load the axios HTTP library which allows us to easily issue requests
- * to our Laravel back-end. This library automatically handles sending the
- * CSRF token as a header based on the value of the "XSRF" token cookie.
- */
-
-import axios from 'axios';
-window.axios = axios;
-
-window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
-// [tl! collapse:end add:1,2]
-import { Current } from 'current.js';
-window.Current = Current;
-// [tl! collapse:start]
-/**
- * Echo exposes an expressive API for subscribing to channels and listening
- * for events that are broadcast by Laravel. Echo and event broadcasting
- * allows your team to easily build robust real-time web applications.
- */
-// [tl! collapse:end]
-import Echo from 'laravel-echo';
-
-import Pusher from 'pusher-js';
-window.Pusher = Pusher;
-
-window.Echo = new Echo({
-    broadcaster: 'pusher',
-    key: import.meta.env.VITE_PUSHER_APP_KEY, // [tl! remove:0,6]
-    cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER ?? 'mt1',
-    wsHost: import.meta.env.VITE_PUSHER_HOST ? import.meta.env.VITE_PUSHER_HOST : `ws-${import.meta.env.VITE_PUSHER_APP_CLUSTER}.pusher.com`,
-    wsPort: import.meta.env.VITE_PUSHER_PORT ?? 80,
-    wssPort: import.meta.env.VITE_PUSHER_PORT ?? 443,
-    forceTLS: (import.meta.env.VITE_PUSHER_SCHEME ?? 'https') === 'https',
-    key: Current.pusher.key, // [tl! add:0,6]
-    cluster: Current.pusher.cluster,
-    wsHost: Current.pusher.wsHost,
-    wsPort: Current.pusher.wsPort ?? 80,
-    wssPort: Current.pusher.wssPort ?? 443,
-    forceTLS: (Current.pusher.forceTLS ?? 'false') == true,
-    enabledTransports: ['ws', 'wss'],
-});
-```
-
-Now we're set!
+That's it!
 
 ## Broadcasting Turbo Streams
 
@@ -857,7 +552,7 @@ class ChirpController extends Controller
         // [tl! add:1,4]
         $chirp->broadcastPrependTo('chirps')
             ->target('chirps')
-            ->partial('chirps._chirp', ['chirp' => $chirp])
+            ->partial('chirps.partials.chirp', ['chirp' => $chirp])
             ->toOthers();
 
         if ($request->wantsTurboStream()) {
@@ -1006,7 +701,7 @@ class ChirpController extends Controller
 
         $chirp->broadcastPrependTo('chirps')
             ->target('chirps')
-            ->partial('chirps._chirp', ['chirp' => $chirp])
+            ->partial('chirps.partials.chirp', ['chirp' => $chirp])
             ->toOthers();
 
         if ($request->wantsTurboStream()) {
@@ -1065,7 +760,7 @@ class ChirpController extends Controller
         // [tl! add:1,4]
         $chirp->broadcastReplaceTo('chirps')
             ->target(dom_id($chirp))
-            ->partial('chirps._chirp', ['chirp' => $chirp])
+            ->partial('chirps.partials.chirp', ['chirp' => $chirp])
             ->toOthers();
 
         if ($request->wantsTurboStream()) {
@@ -1160,7 +855,7 @@ class ChirpController extends Controller
 
         $chirp->broadcastPrependTo('chirps')
             ->target('chirps')
-            ->partial('chirps._chirp', ['chirp' => $chirp])
+            ->partial('chirps.partials.chirp', ['chirp' => $chirp])
             ->toOthers();
 
         if ($request->wantsTurboStream()) {
@@ -1219,7 +914,7 @@ class ChirpController extends Controller
 
         $chirp->broadcastReplaceTo('chirps')
             ->target(dom_id($chirp))
-            ->partial('chirps._chirp', ['chirp' => $chirp])
+            ->partial('chirps.partials.chirp', ['chirp' => $chirp])
             ->toOthers();
 
         if ($request->wantsTurboStream()) {
@@ -1364,7 +1059,7 @@ class ChirpController extends Controller
         // [tl! remove:1,4]
         $chirp->broadcastPrependTo('chirps')
             ->target('chirps')
-            ->partial('chirps._chirp', ['chirp' => $chirp])
+            ->partial('chirps.partials.chirp', ['chirp' => $chirp])
             ->toOthers();
 
         if ($request->wantsTurboStream()) {
@@ -1423,7 +1118,7 @@ class ChirpController extends Controller
         // [tl! remove:1,4]
         $chirp->broadcastReplaceTo('chirps')
             ->target(dom_id($chirp))
-            ->partial('chirps._chirp', ['chirp' => $chirp])
+            ->partial('chirps.partials.chirp', ['chirp' => $chirp])
             ->toOthers();
 
         if ($request->wantsTurboStream()) {
@@ -1469,6 +1164,14 @@ class ChirpController extends Controller
 
 ## Testing it out
 
+Before testing it out, we'll need to start a queue worker. That's because Laravel 11 sets the `QUEUE_CONNECTION=database` by default instead of `sync`, and Turbo Laravel will send automatic broadcasts in background. Let's do that:
+
+```bash
+sail artisan queue:work --tries=1
+```
+
+Now we can test it and it should be working!
+
 One more cool thing about this approach: users will receive the broadcasts no matter where the Chirp models were created from! We can test this out by creating a Chirp entry from Tinker, for example. To try that, start a new Tinker session:
 
 ```bash
@@ -1488,7 +1191,7 @@ App\Models\User::first()->chirps()->create(['message' => 'Hello from Tinker!'])
 # }
 ```
 
-![Broadcasting from Tinker](/images/broadcasting-tinker.png)
+![Broadcasting from Tinker](/images/bootcamp/broadcasting-tinker.png)
 
 ### Extra Credit: Fixing The Missing Dropdowns
 
@@ -1496,20 +1199,68 @@ When creating the Chirp from Tinker, even though we see them appearing on the pa
 
 Instead of conditionally rendering the dropdown in the server side, let's switch to always rendering them and hide it from our users with a sprinkle of JavaScript instead.
 
-First, let's update our `layouts.current-meta` partial to include a few things about the currently authenticated user when there's one:
+First, let's update our `layouts.partials.current-identity` partial to include a few things about the currently authenticated user when there's one:
 
-```blade filename="resources/views/layouts/current-meta.blade.php"
-{{-- Pusher Client-Side Config --}}
-<meta name="current-pusher-key" content="{{ config('broadcasting.connections.pusher.key') }}" />
-<meta name="current-pusher-cluster" content="{{ config('broadcasting.connections.pusher.frontend_options.cluster') }}" />
-<meta name="current-pusher-wsHost" content="{{ config('broadcasting.connections.pusher.frontend_options.host') }}" />
-<meta name="current-pusher-wsPort" content="{{ config('broadcasting.connections.pusher.frontend_options.port') }}" />
-<meta name="current-pusher-forceTLS" content="{{ config('broadcasting.connections.pusher.frontend_options.forceTLS') ? 'true' : 'false' }}" />
-<!-- [tl! add:1,4] -->
+```blade filename="resources/views/layouts/partials/current-identity.blade.php"
 @auth
 <meta name="current-identity-id" content="{{ Auth::user()->id }}" />
 <meta name="current-identity-name" content="{{ Auth::user()->name }}" />
 @endauth
+```
+
+Next, update the `app.blade.php` to include it:
+
+```blade filename="resources/views/layouts/app.blade.php"
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
+        @if ($viewTransitions ?? false)
+        <meta name="view-transition" content="same-origin" />
+        @endif
+        @include('layouts.partials.reverb')
+        @include('layouts.partials.current-identity')
+        {{ $meta ?? '' }}
+        <!-- [tl! add:-2,1 collapse:start] -->
+
+        <title>{{ config('app.name', 'Laravel') }}</title>
+
+        <!-- Fonts -->
+        <link rel="preconnect" href="https://fonts.bunny.net">
+        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+
+        <!-- Styles -->
+        <link rel="stylesheet" href="{{ tailwindcss('css/app.css') }}">
+
+        <!-- Scripts -->
+        <x-importmap::tags />
+        <!-- [tl! collapse:end] -->
+    </head>
+    <!-- [tl! collapse:start] -->
+    <body class="font-sans antialiased">
+        <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
+            @include('layouts.partials.navigation')
+            @include('layouts.partials.notifications')
+
+            <!-- Page Heading -->
+            @if (isset($header))
+                <header class="bg-white dark:bg-gray-800 shadow">
+                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                        {{ $header }}
+                    </div>
+                </header>
+            @endif
+
+            <!-- Page Content -->
+            <main>
+                {{ $slot }}
+            </main>
+        </div>
+    </body>
+    <!-- [tl! collapse:end] -->
+</html>
 ```
 
 Now, we're going to create a new Stimulus controller that is going to be responsible for the dropdown visibilily. It should only show it if the currently authenticated user is the creator of the Chirp. First, let's create the controller:
@@ -1522,7 +1273,6 @@ Now, update the Stimulus controller to look like this:
 
 ```js filename="resources/js/controllers/visible_to_creator_controller.js"
 import { Controller } from "@hotwired/stimulus"
-import { Current } from 'current.js'
 
 // Connects to data-controller="visible-to-creator"
 export default class extends Controller {
@@ -1537,7 +1287,7 @@ export default class extends Controller {
     }
 
     toggleVisibility() {
-        if (this.idValue == Current.identity.id) {
+        if (this.idValue == window.Current.identity.id) {
             this.element.classList.remove(...this.hiddenClasses)
         } else {
             this.element.classList.add(...this.hiddenClasses)
@@ -1625,7 +1375,7 @@ switch ($width) {
 @endphp
 <!-- [tl! collapse:end remove:1,1 add:2,1] -->
 <div class="relative" data-controller="dropdown" data-action="turbo:before-cache@window->dropdown#closeNow click@window->dropdown#close close->dropdown#close">
-<div {{ $attributes->merge(['class' => 'relative']) }} data-controller="dropdown {{ $dataController }}" data-action="turbo:before-cache@window->dropdown#closeNow click@window->dropdown#close close->dropdown#close {{ $dataAction }}">
+<div {{ $attributes->merge(['class' => 'relative', 'data-controller' => "dropdown {$dataController}", 'data-action' => "turbo:before-cache@window->dropdown#closeNow click@window->dropdown#closeWhenClickedOutside close->dropdown#close:stop {$dataAction}"]) }}>
     <!-- [tl! collapse:start] -->
     <div data-action="click->dropdown#toggle" data-dropdown-target="trigger">
         {{ $trigger }}

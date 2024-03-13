@@ -41,17 +41,14 @@ Route::resource('chirps', ChirpController::class)
     ->only(['index', 'create', 'store', 'edit', 'update']) // [tl! remove:-1,1 add]
     ->middleware(['auth', 'verified']);
 // [tl! collapse:start]
+
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+    Route::prefix('profile')->as('profile.')->group(function () {
+        Route::singleton('password', ProfilePasswordController::class)->only(['edit', 'update']);
+    });
 
-    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-
-    Route::get('/profile/password/edit', [ProfilePasswordController::class, 'edit'])->name('profile.password.edit');
-    Route::patch('/profile/password', [ProfilePasswordController::class, 'update'])->name('profile.password.update');
-
-    Route::get('/profile/delete', [ProfileController::class, 'delete'])->name('profile.delete');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/delete', [ProfileController::class, 'delete'])->name('profile.delete');
+    Route::singleton('profile', ProfileController::class)->destroyable();
 });
 
 require __DIR__.'/auth.php'; // [tl! collapse:end]
@@ -115,14 +112,16 @@ We can now update the `edit` action on our `ChirpController` class to show the f
 
 ```php filename="app/Http/Controllers/ChirpController.php"
 <?php
-// [tl! collapse:start]
+
 namespace App\Http\Controllers;
 
 use App\Models\Chirp;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests; // [tl! add]
 use Illuminate\Http\Request;
-// [tl! collapse:end]
+
 class ChirpController extends Controller
 {
+    use AuthorizesRequests; // [tl! add]
     // [tl! collapse:start]
     /**
      * Display a listing of the resource.
@@ -379,7 +378,7 @@ class ChirpPolicy
 
 You should be able to use the dropdown, click on the Edit link and view the edit Chirp form:
 
-![Edit Chirp Form](/images/editing-chirps-form.png)
+![Edit Chirp Form](/images/bootcamp/editing-chirps-form.png)
 
 ## Updating Chirps
 
@@ -391,11 +390,14 @@ We can now change the `update` action on our `ChirpController` class to validate
 namespace App\Http\Controllers;
 
 use App\Models\Chirp;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 // [tl! collapse:end]
 class ChirpController extends Controller
 {
     // [tl! collapse:start]
+    use AuthorizesRequests;
+
     /**
      * Display a listing of the resource.
      *
@@ -505,6 +507,6 @@ You may have noticed the validation rules are duplicated with the `store` action
 
 Time to test it out! Go ahead and edit a few Chirps using the dropdown menu. If you register another user account, you'll see that only the author of a Chirp can edit it.
 
-![Changed Chirps](/images/editing-chirps-changed.png)
+![Changed Chirps](/images/bootcamp/editing-chirps-changed.png)
 
 [Continue to deleting Chirps...](/guides/deleting-chirps)
