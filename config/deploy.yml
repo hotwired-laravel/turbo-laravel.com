@@ -47,3 +47,6 @@ healthcheck:
 # version inside the asset_path.
 asset_path: /var/www/html/public/dist
 
+traefik:
+  host_port: 8080
+
