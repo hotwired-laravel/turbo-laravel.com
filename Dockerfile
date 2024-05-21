@@ -1,7 +1,8 @@
 FROM serversideup/php:8.2-fpm-nginx as base
 
-
 FROM base as builder
+
+USER root
 
 # Cache the vendor files first
 COPY composer.json composer.lock /var/www/html
@@ -15,10 +16,10 @@ FROM base
 ENV SSL_MODE="off"
 
 # Copy the app files...
-COPY --chown=webuser:webgroup . /var/www/html
+COPY --chown=www-data:www-data . /var/www/html
 
 # Copy the vendor folder from builder step...
-COPY --from=builder --chown=webuser:webgroup /var/www/html/vendor /var/www/html/vendor
+COPY --from=builder --chown=www-data:www-data /var/www/html/vendor /var/www/html/vendor
 
 # Re-run install, but now with scripts and optimizing the autoloader...
 RUN composer install --no-interaction --prefer-dist --optimize-autoloader
