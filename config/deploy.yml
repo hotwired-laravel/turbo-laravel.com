@@ -40,7 +40,7 @@ builder:
 
 healthcheck:
   path: /up
-  port: 80
+  port: 8080
 
 # Bridge fingerprinted assets, like JS and CSS, between versions to avoid
 # hitting 404 on in-flight requests. Combines all files from new and old
