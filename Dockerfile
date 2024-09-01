@@ -21,6 +21,9 @@ COPY --chown=www-data:www-data . /var/www/html
 # Copy the vendor folder from builder step...
 COPY --from=builder --chown=www-data:www-data /var/www/html/vendor /var/www/html/vendor
 
+# Pull Docs...
+RUN bash /var/www/html/bin/docs-pull.sh
+
 # Re-run install, but now with scripts and optimizing the autoloader...
 RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 
