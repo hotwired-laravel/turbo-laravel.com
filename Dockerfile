@@ -18,7 +18,7 @@ USER root
 # Copy the app files...
 COPY --chown=www-data:www-data . /var/www/html
 
-RUN apt-get update -y && apt-get install -y git
+RUN apt-get update -y && apt-get install -y git-core
 
 # Pull Docs...
 RUN cd /var/www/html && bash bin/docs-pull.sh && rm -rf resources/sources
