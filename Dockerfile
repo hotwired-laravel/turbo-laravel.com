@@ -22,7 +22,7 @@ COPY --chown=www-data:www-data . /var/www/html
 COPY --from=builder --chown=www-data:www-data /var/www/html/vendor /var/www/html/vendor
 
 # Pull Docs...
-RUN bash /var/www/html/bin/docs-pull.sh && rm -rf /var/ww/html/resources/sources
+RUN cd /var/www/html && bash bin/docs-pull.sh && rm -rf resources/sources
 
 # Re-run install, but now with scripts and optimizing the autoloader...
 RUN composer install --no-interaction --prefer-dist --optimize-autoloader
