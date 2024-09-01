@@ -15,7 +15,7 @@ FROM base AS docs
 
 USER root
 
-RUN apt-get update -y && apt-get install -y
+RUN apt-get update -y && apt-get install -y git
 
 # Pull Docs...
 RUN cd /var/www/html && bash bin/docs-pull.sh && rm -rf resources/sources
