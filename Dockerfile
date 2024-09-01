@@ -15,6 +15,9 @@ FROM base AS docs
 
 USER root
 
+# Copy the app files...
+COPY --chown=www-data:www-data . /var/www/html
+
 RUN apt-get update -y && apt-get install -y git
 
 # Pull Docs...
