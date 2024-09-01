@@ -11,6 +11,15 @@ RUN mkdir -p app && \
     mkdir -p database/{factories,seeders} && \
     composer install --no-interaction --prefer-dist --no-scripts
 
+FROM base AS docs
+
+USER root
+
+RUN apt-get update -y && apt-get install -y
+
+# Pull Docs...
+RUN cd /var/www/html && bash bin/docs-pull.sh && rm -rf resources/sources
+
 FROM base
 
 ENV SSL_MODE="off"
@@ -21,8 +30,8 @@ COPY --chown=www-data:www-data . /var/www/html
 # Copy the vendor folder from builder step...
 COPY --from=builder --chown=www-data:www-data /var/www/html/vendor /var/www/html/vendor
 
-# Pull Docs...
-RUN cd /var/www/html && bash bin/docs-pull.sh && rm -rf resources/sources
+# Copy docs...
+COPY --from=docs --chown=www-data:www-data /var/www/html/resources/docs /var/www/html/resources/docs
 
 # Re-run install, but now with scripts and optimizing the autoloader...
 RUN composer install --no-interaction --prefer-dist --optimize-autoloader
