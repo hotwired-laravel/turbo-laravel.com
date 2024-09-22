@@ -79,7 +79,7 @@ Turbo Breeze offers two stack options: `turbo`, which comes with [Importmap Lara
 Open a new terminal in your `turbo-chirper` project directory and install your chosen stack with the given commands:
 
 ```bash
-composer require hotwired-laravel/turbo-breeze:1.0.0-beta17 --dev
+composer require hotwired-laravel/turbo-breeze:1.x-dev --dev
 
 php artisan turbo-breeze:install turbo --dark
 ```
